@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Nrl/Utils.hpp"
+#include "../Utils.hpp"
 
 namespace Nrl {
     template<typename T>

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Nrl/Debug.hpp"
+#include "./Debug.hpp"
 
-#include "Nrl/Primitives.hpp"
-#include "Nrl/Utils.hpp"
+#include "./Primitives.hpp"
+#include "./Utils.hpp"
 
-#include "Nrl/Pointers/Ref.hpp"
+#include "./Pointers/Ref.hpp"
 
 namespace Nrl {
     template<typename T>
