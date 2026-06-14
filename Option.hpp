@@ -23,6 +23,8 @@ namespace Nrl {
     template<typename T>
     using Option = typename OptionAlias<T>::Type;
 
+    class None_t {};
+
     template<typename T>
     class NonIntrusiveOption {
     public:
@@ -49,6 +51,12 @@ namespace Nrl {
 
         NonIntrusiveOption(NonIntrusiveOption&& other) noexcept = default;
         NonIntrusiveOption& operator=(NonIntrusiveOption&& other) noexcept = default;
+
+        NonIntrusiveOption(const None_t& none) : NonIntrusiveOption(T::_None) {}
+        NonIntrusiveOption& operator=(const None_t& none) { destroy(); }
+
+        NonIntrusiveOption(None_t&& none) : NonIntrusiveOption(T::_None) {}
+        NonIntrusiveOption& operator=(None_t&& none) { destroy(); }
 
         T unwrap(void) {
             NRL_ASSERT(is_some(), "Could not unwrap Option: No value!");
@@ -167,6 +175,9 @@ namespace Nrl {
             return *this;
         }
 
+        IntrusiveOption(const None_t& none) : IntrusiveOption() {}
+        IntrusiveOption& operator=(const None_t& none) { destroy(); }
+
         T unwrap(void) {
             NRL_ASSERT(m_IsSome, "Could not unwrap Option: No value!");
             m_IsSome = false;
@@ -199,12 +210,8 @@ namespace Nrl {
     private:
         IntrusiveOption(void) : m_Data{}, m_IsSome(false) {}
 
-        [[nodiscard]] T* _ptr(void) {
-            return (T*)m_Data;
-        }
-        [[nodiscard]] const T* _ptr(void) const {
-            return (const T*)m_Data;
-        }
+        [[nodiscard]] constexpr T* _ptr(void) { return (T*)m_Data; }
+        [[nodiscard]] constexpr const T* _ptr(void) const { return (const T*)m_Data; }
     private:
         alignas(T) byte_t m_Data[sizeof(T)];
         bool m_IsSome;
@@ -215,6 +222,8 @@ namespace Nrl {
 
     template<typename T, typename F, typename... Args>
     constexpr Option<T> SomeWith(F&& factory, Args&&... args) { return Option<T>::SomeWith(Forward<F>(factory), Forward<Args>(args)...); }
+
+    constexpr None_t None(void) { return None_t{}; }
 
     template<typename T>
     constexpr Option<T> None(void) { return Option<T>::None(); }
