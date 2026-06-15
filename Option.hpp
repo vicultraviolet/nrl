@@ -5,7 +5,7 @@
 #include "./Primitives.hpp"
 #include "./Utils.hpp"
 
-#include "./Pointers/Ref.hpp"
+#include "./Ref.hpp"
 
 namespace Nrl {
     template<typename T>
@@ -227,7 +227,7 @@ namespace Nrl {
         [[nodiscard]] constexpr T* _ptr(void) { return (T*)m_Data; }
         [[nodiscard]] constexpr const T* _ptr(void) const { return (const T*)m_Data; }
     private:
-        alignas(T) byte_t m_Data[sizeof(T)];
+        alignas(T) ubyte m_Data[sizeof(T)];
         bool m_IsSome;
     };
 

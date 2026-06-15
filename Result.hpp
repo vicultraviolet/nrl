@@ -1,9 +1,9 @@
 #pragma once
 
-#include "nrl/Option.hpp"
-#include "nrl/Pointers/Ref.hpp"
-#include "nrl/Primitives.hpp"
-#include "nrl/Utils.hpp"
+#include "./Option.hpp"
+#include "./Ref.hpp"
+#include "./Primitives.hpp"
+#include "./Utils.hpp"
 
 namespace Nrl {
     enum class ResultState : u8 {

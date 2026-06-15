@@ -1,11 +1,9 @@
 #pragma once
 
-#include "../Utils.hpp"
+#include "./Utils.hpp"
 
 namespace Nrl {
-    template<typename T>
-    class NonIntrusiveOption;
-
+    // non owning, non zero reference (unless inside Option)
     template<typename T>
     class Ref {
     public:
@@ -39,6 +37,9 @@ namespace Nrl {
 
 		[[nodiscard]] constexpr auto operator<=>(const Ref& other) const { return m_Ptr <=> other.m_Ptr; }
 		[[nodiscard]] constexpr auto operator==(const Ref& other) const { return m_Ptr == other.m_Ptr; }
+
+		template<typename U>
+		[[nodiscard]] explicit operator Ref<U>(void) { return Ref<U>::New(*(U*)m_Ptr); }
 
         [[nodiscard]] constexpr static Ref _None(void) { return nullptr; }
         [[nodiscard]] constexpr bool _is_some(void) const { return m_Ptr; }

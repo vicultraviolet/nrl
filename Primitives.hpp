@@ -37,7 +37,10 @@ namespace Nrl {
         constexpr b8 k_False = 0;
         constexpr b8 k_True  = 1;
 
-        using byte_t = unsigned char;
+        using ubyte = unsigned char;
+
+        using uptr = uintptr_t;
+        constexpr size_t k_PtrSize = sizeof(size_t);
     } // namespace Primitives
     using namespace Primitives;
 } // namespace Nrl
