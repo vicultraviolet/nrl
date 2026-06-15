@@ -30,7 +30,7 @@ namespace Nrl {
     public:
         template<typename F, typename... Args>
         [[nodiscard]] static NonIntrusiveOption SomeWith(F&& factory, Args&&... args) {
-            return NonIntrusiveOption(factory, Forward<Args>(args)...);
+            return NonIntrusiveOption(k_InPlace, factory, Forward<Args>(args)...);
         }
 
         template<typename... Args>
@@ -41,29 +41,43 @@ namespace Nrl {
         }
 
         [[nodiscard]] static NonIntrusiveOption None(void) {
-            return NonIntrusiveOption(T::_None);
+            return NonIntrusiveOption(k_InPlace, T::_None);
         }
 
         ~NonIntrusiveOption(void) = default;
 
-        NonIntrusiveOption(const NonIntrusiveOption& other) = default;
-        NonIntrusiveOption& operator=(const NonIntrusiveOption& other) = default;
+        NonIntrusiveOption(const NonIntrusiveOption& other) : m_Data(other.m_Data) {}
+        NonIntrusiveOption& operator=(const NonIntrusiveOption& other) {
+            if (this == &other)
+                return *this;
 
-        NonIntrusiveOption(NonIntrusiveOption&& other) noexcept = default;
-        NonIntrusiveOption& operator=(NonIntrusiveOption&& other) noexcept = default;
+            m_Data = other.m_Data;
 
-        NonIntrusiveOption(const None_t& none) : NonIntrusiveOption(T::_None) {}
-        NonIntrusiveOption& operator=(const None_t& none) { destroy(); }
+            return *this;
+        }
 
-        NonIntrusiveOption(None_t&& none) : NonIntrusiveOption(T::_None) {}
-        NonIntrusiveOption& operator=(None_t&& none) { destroy(); }
+        NonIntrusiveOption(NonIntrusiveOption&& other) noexcept : m_Data(Move(other.m_Data)) { }
+        NonIntrusiveOption& operator=(NonIntrusiveOption&& other) noexcept {
+            if (this == &other)
+                return *this;
+
+            m_Data = Move(other.m_Data);
+
+            return *this;
+        }
+
+        NonIntrusiveOption(None_t none) : NonIntrusiveOption(k_InPlace, T::_None) {}
+        NonIntrusiveOption& operator=(None_t none) { destroy(); }
 
         T unwrap(void) {
             NRL_ASSERT(is_some(), "Could not unwrap Option: No value!");
             return Move(m_Data);
         }
 
-        void destroy(void) { m_Data.~T(); }
+        void destroy(void) {
+            if (is_some())
+                m_Data.~T();
+        }
 
         [[nodiscard]] Option<Ref<T>> ref(void) {
             if (is_none()) {
@@ -83,7 +97,7 @@ namespace Nrl {
         [[nodiscard]] constexpr bool is_none(void) const { return !m_Data._is_some(); }
     private:
         template<typename F, typename... Args>
-        NonIntrusiveOption(F&& factory, Args&&... args) : m_Data(factory(Forward<Args>(args)...)) {}
+        NonIntrusiveOption(InPlaceTag, F&& factory, Args&&... args) : m_Data(factory(Forward<Args>(args)...)) {}
     private:
         T m_Data;
     };
@@ -175,10 +189,10 @@ namespace Nrl {
             return *this;
         }
 
-        IntrusiveOption(const None_t& none) : IntrusiveOption() {}
-        IntrusiveOption& operator=(const None_t& none) { destroy(); }
+        IntrusiveOption(None_t none) : IntrusiveOption() {}
+        IntrusiveOption& operator=(None_t none) { destroy(); }
 
-        T unwrap(void) {
+        [[nodiscard]] T unwrap(void) {
             NRL_ASSERT(m_IsSome, "Could not unwrap Option: No value!");
             m_IsSome = false;
             return Move(*_ptr());

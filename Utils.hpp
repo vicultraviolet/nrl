@@ -6,6 +6,9 @@ inline void* operator new(size_t, void* p) noexcept { return p; }
 inline void operator delete(void*, void*) noexcept {}
 
 namespace Nrl {
+    struct InPlaceTag { explicit InPlaceTag(void) = default; };
+    inline constexpr InPlaceTag k_InPlace{};
+
     template<typename T>
     RemoveReference_t<T>&& Move(T&& moved) {
         return (RemoveReference_t<T>&&)moved;
