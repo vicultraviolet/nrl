@@ -41,6 +41,7 @@ namespace Nrl {
 
         using uptr = uintptr_t;
         constexpr size_t k_PtrSize = sizeof(size_t);
+        using nullptr_t = decltype(nullptr);
     } // namespace Primitives
     using namespace Primitives;
 } // namespace Nrl
