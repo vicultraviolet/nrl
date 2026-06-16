@@ -67,7 +67,7 @@ namespace Nrl {
         }
 
         NonIntrusiveOption(None_t none) : NonIntrusiveOption(k_InPlace, T::_None) {}
-        NonIntrusiveOption& operator=(None_t none) { destroy(); }
+        NonIntrusiveOption& operator=(None_t none) { destroy(); return *this; }
 
         T unwrap(void) {
             NRL_ASSERT(is_some(), "Could not unwrap Option: No value!");
@@ -190,7 +190,7 @@ namespace Nrl {
         }
 
         IntrusiveOption(None_t none) : IntrusiveOption() {}
-        IntrusiveOption& operator=(None_t none) { destroy(); }
+        IntrusiveOption& operator=(None_t none) { destroy(); return *this; }
 
         [[nodiscard]] T unwrap(void) {
             NRL_ASSERT(m_IsSome, "Could not unwrap Option: No value!");

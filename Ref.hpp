@@ -11,6 +11,8 @@ namespace Nrl {
             return &referenced;
         }
 
+        ~Ref(void) { m_Ptr = nullptr; }
+
         Ref(const Ref& other) : m_Ptr(other.m_Ptr) {}
         Ref& operator=(const Ref& other) {
             if (this == &other)
@@ -48,4 +50,5 @@ namespace Nrl {
     private:
         T* m_Ptr;
     };
+
 } // namespace Nrl
