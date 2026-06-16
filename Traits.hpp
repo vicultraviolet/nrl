@@ -35,12 +35,84 @@ namespace Nrl {
     template<typename T>
     constexpr bool IsLvalueReference_v = IsLvalueReference<T>::value;
 
-    template<typename T> struct RemoveReference { using Type = T; };
+    template<typename Base, typename Derived>
+    struct IsBaseOf : FalseType {};
 
-    template<typename T> struct RemoveReference<T&> { using Type = T; };
+    template<typename Base, typename Derived>
+    requires requires { (Base*)((Derived*)(nullptr)); }
+    struct IsBaseOf<Base, Derived> : TrueType {};
 
-    template<typename T> struct RemoveReference<T&&> { using Type = T; };
+    template<typename Base, typename Derived>
+    constexpr bool IsBaseOf_v = IsBaseOf<Base, Derived>::value;
 
+    template<typename T>
+    [[nodiscard]] T declval(void) noexcept;
+
+    template<typename From, typename To>
+    struct IsConvertible : FalseType {};
+
+    template<typename From, typename To>
+    requires requires { (To)declval<From>(); }
+    struct IsConvertible<From, To> : TrueType {};
+
+    template<typename From, typename To>
+    constexpr bool IsConvertible_v = IsConvertible<From, To>::value;
+
+    template<bool B, typename T = void>
+    struct EnableIf {};
+
+    template<typename T>
+    struct EnableIf<true, T> { using Type = T; };
+
+    template<bool B, typename T = void>
+    using EnableIf_t = typename EnableIf<B, T>::Type;
+
+    template<typename T>
+    struct RemoveConst {
+        using Type = T;
+    };
+    template<typename T>
+    struct RemoveConst<const T> {
+        using Type = T;
+    };
+    template<typename T>
+    using RemoveConst_t = typename RemoveConst<T>::Type;
+
+    template<typename T>
+    struct RemovePointer {
+        using Type = T;
+    };
+    template<typename T>
+    struct RemovePointer<T*> {
+        using Type = T;
+    };
+    template<typename T>
+    struct RemovePointer<T* const> {
+        using Type = T;
+    };
+    template<typename T>
+    struct RemovePointer<T* volatile> {
+        using Type = T;
+    };
+    template<typename T>
+    struct RemovePointer<T* const volatile> {
+        using Type = T;
+    };
+    template<typename T>
+    using RemovePointer_t = typename RemovePointer<T>::Type;
+
+    template<typename T>
+    struct RemoveReference {
+        using Type = T;
+    };
+    template<typename T>
+    struct RemoveReference<T&> {
+        using Type = T;
+    };
+    template<typename T>
+    struct RemoveReference<T&&> {
+        using Type = T;
+    };
     template<typename T>
     using RemoveReference_t = typename RemoveReference<T>::Type;
 
