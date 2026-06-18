@@ -7,7 +7,6 @@ namespace Nrl {
         static constexpr size_t Length(void) noexcept { return sizeof...(Ints); }
     };
 
-    // Helper that uses a size_t counter (non-dependent type)
     template<typename T, size_t N, T... Ints>
     struct NewIntegerSequenceImpl {
         using Type = typename NewIntegerSequenceImpl<T, N - 1, (T)(N - 1), Ints...>::Type;
