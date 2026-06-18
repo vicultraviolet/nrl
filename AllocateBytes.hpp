@@ -19,7 +19,7 @@ namespace Nrl {
         if (!ptr)
             return None();
 
-        return SomeWith<Ref<ubyte>>(Ref<ubyte>::New, *(ubyte*)ptr);
+        return SomeWith(Ref<ubyte>::New, *(ubyte*)ptr);
     }
 
     inline void DeallocateBytes(Ref<ubyte> ref) noexcept {

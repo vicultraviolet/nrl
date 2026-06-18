@@ -232,13 +232,16 @@ namespace Nrl {
     };
 
     template<typename T, typename... Args>
-    constexpr Option<T> Some(Args&&... args) { return Option<T>::Some(Forward<Args>(args)...); }
+    [[nodiscard]] constexpr Option<T> Some(Args&&... args) { return Option<T>::Some(Forward<Args>(args)...); }
 
-    template<typename T, typename F, typename... Args>
-    constexpr Option<T> SomeWith(F&& factory, Args&&... args) { return Option<T>::SomeWith(Forward<F>(factory), Forward<Args>(args)...); }
+    template<typename F, typename... Args>
+    [[nodiscard]] constexpr auto SomeWith(F&& factory, Args&&... args) {
+        using T = InvokeResult_t<F, Args...>;
+        return Option<T>::SomeWith(Forward<F>(factory), Forward<Args>(args)...);
+    }
 
-    constexpr None_t None(void) { return None_t{}; }
+    [[nodiscard]] constexpr None_t None(void) { return None_t{}; }
 
     template<typename T>
-    constexpr Option<T> None(void) { return Option<T>::None(); }
+    [[nodiscard]] constexpr Option<T> None(void) { return Option<T>::None(); }
 } // namespace Nrl
