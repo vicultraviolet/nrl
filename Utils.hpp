@@ -2,6 +2,14 @@
 
 #include "./Traits.hpp"
 
+#if defined(__has_cpp_attribute) && __has_cpp_attribute(msvc::no_unique_address)
+    #define NRL_NO_UNIQUE_ADDRESS [[msvc::no_unique_address]]
+#elif defined(__has_cpp_attribute) && __has_cpp_attribute(no_unique_address)
+    #define NRL_NO_UNIQUE_ADDRESS [[no_unique_address]]
+#else
+    #define NRL_NO_UNIQUE_ADDRESS
+#endif
+
 inline void* operator new(size_t, void* p) noexcept { return p; }
 inline void operator delete(void*, void*) noexcept {}
 

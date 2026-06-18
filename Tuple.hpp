@@ -14,6 +14,7 @@ namespace Nrl {
         Tuple(void) = default;
         Tuple(InPlaceTag) {}
 
+        [[nodiscard]] constexpr static Tuple New(void) { return Tuple(); }
         [[nodiscard]] constexpr static Tuple Default(void) { return Tuple(); }
 
         [[nodiscard]] constexpr bool operator==(const Tuple& other) const { return true; }
@@ -216,7 +217,7 @@ namespace Nrl {
         using Function = F;
 
         F f;
-        Tuple<Args...> tuple;
+        NRL_NO_UNIQUE_ADDRESS Tuple<Args...> tuple;
 
         constexpr Type call(void) const & { return CallWithTuple(f, tuple); }
         constexpr Type call(void) & { return CallWithTuple(f, tuple); }
