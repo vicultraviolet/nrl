@@ -121,4 +121,12 @@ namespace Nrl {
         { T::_None() } -> c_SameAs<T>;
         { const_cast<const T&>(t)._is_some() } -> c_SameAs<bool>;
     };
+
+    template<typename F, typename... Args>
+    struct InvokeResult {
+        using Type = decltype(declval<F>()(declval<Args>()...));
+    };
+
+    template<typename F, typename... Args>
+    using InvokeResult_t = typename InvokeResult<F, Args...>::Type;
 } // namespace Nrl

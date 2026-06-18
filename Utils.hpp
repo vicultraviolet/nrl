@@ -31,4 +31,7 @@ namespace Nrl {
         replaced = Forward<U>(new_value);
         return old;
     }
+
+    template<typename T>
+    [[nodiscard]] T New(T&& t) { return Forward<T>(t); }
 } // namespace Nrl
