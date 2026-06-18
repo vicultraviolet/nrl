@@ -250,7 +250,7 @@ namespace Nrl {
     };
 
     template<typename T>
-    [[nodiscard]] constexpr Option<T> Some(T&& t) { return Option<T>::Some(Forward<T>(t)); }
+    [[nodiscard]] constexpr auto Some(T&& t) { return Option<RemoveReference_t<T>>::Some(Forward<T>(t)); }
 
     template<typename T, typename... Args>
     [[nodiscard]] constexpr Option<T> MakeSome(Args&&... args) { return Option<T>::Some(Forward<Args>(args)...); }
