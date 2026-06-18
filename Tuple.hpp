@@ -47,13 +47,13 @@ namespace Nrl {
             return *this;
         }
 
-        Tuple(Tuple&& other) noexcept : Base(Move(other)), m_Head(Move(other.m_Head)) {}
+        Tuple(Tuple&& other) noexcept : Base((Base&&)other), m_Head(Forward<Head>(other.m_Head)) {}
         Tuple& operator=(Tuple&& other) noexcept {
             if (this == &other)
                 return *this;
 
-            Base::operator=(Move(other));
-            m_Head = Move(other.m_Head);
+            Base::operator=((Base&&)other);
+            m_Head = Forward<Head>(other.m_Head);
 
             return *this;
         }

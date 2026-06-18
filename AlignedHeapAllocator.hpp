@@ -25,6 +25,11 @@ namespace Nrl {
         void construct_with(Ref<T> ref, F&& factory, Args&&... args) {
             new (ref.ptr()) T(factory(Forward<Args>(args)...));
         }
+        template<c_HasMake Args>
+        void construct_from(Ref<T> ref, Args&& args) {
+            new (ref.ptr()) T(Forward<Args>(args).make());
+        }
+
         void destroy(Ref<T> ref) noexcept {
             ref->~T();
         }

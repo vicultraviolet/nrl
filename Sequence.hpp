@@ -33,7 +33,5 @@ namespace Nrl {
     using NewIndexSequence = NewIntegerSequence<size_t, N>;
 
     template<typename T, T... Ints>
-    [[nodiscard]] constexpr size_t IntegerSequenceLength(IntegerSequence<T, Ints...>) noexcept {
-        return sizeof...(Ints);
-    }
+    [[nodiscard]] constexpr size_t IntegerSequenceLength(IntegerSequence<T, Ints...>) noexcept { return sizeof...(Ints); }
 } // namespace Nrl

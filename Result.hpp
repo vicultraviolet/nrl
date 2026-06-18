@@ -4,6 +4,7 @@
 #include "./Ref.hpp"
 #include "./Primitives.hpp"
 #include "./Utils.hpp"
+#include "./Tuple.hpp"
 
 namespace Nrl {
     enum class ResultState : u8 {
@@ -18,6 +19,48 @@ namespace Nrl {
         T ok;
         U err;
     };
+
+    template<typename T, typename... Args>
+    struct OkArgs : public ArgsTuple_t<T, Args...> {};
+
+    template<typename T>
+    [[nodiscard]] constexpr OkArgs<RemoveReference_t<T>, T> Ok(T&& t) {
+        return { ArgsTuple<RemoveReference_t<T>>(Forward<T>(t)) };
+    }
+
+    template<typename T, typename... Args>
+    [[nodiscard]] constexpr OkArgs<T, Args...> MakeOk(Args&&... args) {
+        return { ArgsTuple<T>(Forward<Args>(args)...) };
+    }
+
+    template<typename F, typename... Args>
+    struct OkArgsWith : public ArgsTupleWith_t<F, Args...> {};
+
+    template<typename F, typename... Args>
+    [[nodiscard]] constexpr OkArgsWith<F, Args...> OkWith(F&& factory, Args&&... args) {
+        return { ArgsTupleWith<F, Args...>(Forward<F>(factory), Forward<Args>(args)...) };
+    }
+
+    template<typename U, typename... Args>
+    struct ErrArgs : public ArgsTuple_t<U, Args...> {};
+
+    template<typename U>
+    [[nodiscard]] constexpr ErrArgs<RemoveReference_t<U>, U> Err(U&& t) {
+        return { ArgsTuple<RemoveReference_t<U>>(Forward<U>(t)) };
+    }
+
+    template<typename U, typename... Args>
+    [[nodiscard]] constexpr ErrArgs<U, Args...> MakeErr(Args&&... args) {
+        return { ArgsTuple<U>(Forward<Args>(args)...) };
+    }
+
+    template<typename F, typename... Args>
+    struct ErrArgsWith : public ArgsTupleWith_t<F, Args...> {};
+
+    template<typename F, typename... Args>
+    [[nodiscard]] constexpr ErrArgsWith<F, Args...> ErrWith(F&& factory, Args&&... args) {
+        return { ArgsTupleWith<F, Args...>(Forward<F>(factory), Forward<Args>(args)...) };
+    }
 
     template<typename T, typename U>
     class Result {
@@ -46,6 +89,16 @@ namespace Nrl {
             return t;
         }
 
+        template<c_HasMake Args>
+        [[nodiscard]] static Result OkFrom(Args&& args) {
+            Result t;
+
+            new (&t.m_Data.ok) T(Forward<Args>(args).make());
+            t.m_State = ResultState::Ok;
+
+            return t;
+        }
+
         template<typename... Args>
         [[nodiscard]] static Result Err(Args&&... args) {
             Result t;
@@ -66,7 +119,81 @@ namespace Nrl {
             return t;
         }
 
+        template<c_HasMake Args>
+        [[nodiscard]] static Result ErrFrom(Args&& args) {
+            Result t;
+
+            new (&t.m_Data.err) U(Forward<Args>(args).make());
+            t.m_State = ResultState::Err;
+
+            return t;
+        }
+
         ~Result(void) { destroy(); }
+
+        template<typename... Args>
+        Result(const OkArgs<T, Args...>& args) {
+            new (&m_Data.ok) T(args.make());
+            m_State = ResultState::Ok;
+        }
+        template<typename... Args>
+        Result& operator=(const OkArgs<T, Args...>& args) { return *this = Result(args); }
+
+        template<typename... Args>
+        Result(OkArgs<T, Args...>&& args) {
+            new (&m_Data.ok) T(Move(args).make());
+            m_State = ResultState::Ok;
+        }
+        template<typename... Args>
+        Result& operator=(OkArgs<T, Args...>&& args) { return *this = Result(Move(args)); }
+
+        template<typename F, typename... Args>
+        Result(const OkArgsWith<F, Args...>& args) {
+            new (&m_Data.ok) T(args.make());
+            m_State = ResultState::Ok;
+        }
+        template<typename F, typename... Args>
+        Result& operator=(const OkArgsWith<F, Args...>& args) { return *this = Result(args); }
+
+        template<typename F, typename... Args>
+        Result(OkArgsWith<F, Args...>&& args) {
+            new (&m_Data.ok) T(Move(args).make());
+            m_State = ResultState::Ok;
+        }
+        template<typename F, typename... Args>
+        Result& operator=(OkArgsWith<F, Args...>&& args) { return *this = Result(Move(args)); }
+
+        template<typename... Args>
+        Result(const ErrArgs<U, Args...>& args) {
+            new (&m_Data.err) U(args.make());
+            m_State = ResultState::Err;
+        }
+        template<typename... Args>
+        Result& operator=(const ErrArgs<U, Args...>& args) { return *this = Result(args); }
+
+        template<typename... Args>
+        Result(ErrArgs<U, Args...>&& args) {
+            new (&m_Data.err) U(Move(args).make());
+            m_State = ResultState::Err;
+        }
+        template<typename... Args>
+        Result& operator=(ErrArgs<U, Args...>&& args) { return *this = Result(Move(args)); }
+
+        template<typename F, typename... Args>
+        Result(const ErrArgsWith<F, Args...>& args) {
+            new (&m_Data.err) U(args.make());
+            m_State = ResultState::Err;
+        }
+        template<typename F, typename... Args>
+        Result& operator=(const ErrArgsWith<F, Args...>& args) { return *this = Result(args); }
+
+        template<typename F, typename... Args>
+        Result(ErrArgsWith<F, Args...>&& args) {
+            new (&m_Data.err) U(Move(args).make());
+            m_State = ResultState::Err;
+        }
+        template<typename F, typename... Args>
+        Result& operator=(ErrArgsWith<F, Args...>&& args) { return *this = Result(Move(args)); }
 
         Result(const Result& other) {
             switch (other.m_State) {
@@ -219,24 +346,4 @@ namespace Nrl {
         ResultData m_Data;
         ResultState m_State = ResultState::None;
     };
-
-    template<typename T, typename U, typename... Args>
-    [[nodiscard]] Result<T, U> Ok(Args&&... args) {
-        return Result<T, U>::Ok(Forward<Args>(args)... );
-    }
-
-    template<typename T, typename U, typename F, typename... Args>
-    [[nodiscard]] Result<T, U> OkWith(F&& factory, Args&&... args) {
-        return Result<T, U>::OkWith(Forward<F>(factory), Forward<Args>(args)...);
-    }
-
-    template<typename T, typename U, typename... Args>
-    [[nodiscard]] Result<T, U> Err(Args&&... args) {
-        return Result<T, U>::Err(Forward<Args>(args)... );
-    }
-
-    template<typename T, typename U, typename F, typename... Args>
-    [[nodiscard]] Result<T, U> ErrWith(F&& factory, Args&&... args) {
-        return Result<T, U>::ErrWith(Forward<F>(factory), Forward<Args>(args)...);
-    }
 } // namespace Nrl

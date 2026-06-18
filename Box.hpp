@@ -30,6 +30,25 @@ namespace Nrl {
             return ref;
         }
 
+        template<c_HasMake Args>
+            requires SameAs_v<Deleter, DefaultDeleter<T>>
+        [[nodiscard]]
+        static Box MakeFrom(Args&& args) {
+            auto allocator = Allocator<T>::New();
+            Ref<T> ref = allocator.alloc(1);
+            allocator.construct_from(ref, Forward<Args>(args));
+            return ref;
+        }
+
+        template<c_HasMake Args>
+            requires SameAs_v<Deleter, DefaultDeleter<T>>
+        Box(Args&& args) {
+            auto allocator = Allocator<T>::New();
+            m_Ref = allocator.alloc(1);
+            allocator.construct_from(m_Ref, Forward<args>(args));
+            return ref;
+        }
+
         ~Box(void) {
             if (m_Ref._is_some())
                 Deleter::New()(m_Ref);
@@ -102,6 +121,23 @@ namespace Nrl {
             return None();
 
         (void)from.release();
-        return SomeWith<Box<To>>(Box<To>::New, to.unwrap());
+        return SomeWith(Box<To>::New, to.unwrap());
+	}
+
+	template<typename T>
+	[[nodiscard]] constexpr Box<T> NewBox(Ref<T> ref) { return Box<T>::New(ref); }
+
+	template<typename T, typename... Args>
+	[[nodiscard]] constexpr Box<T> MakeBox(Args&&... args) { return Box<T>::Make(Forward<Args>(args)...); }
+
+	template<typename F, typename... Args>
+	[[nodiscard]] constexpr auto MakeBoxWith(F&& factory, Args&&... args) {
+	    using Type = InvokeResult_t<F, Args...>;
+		return Box<Type>::MakeWith(Forward<F>(factory), Forward<Args>(args)...);
+	}
+
+	template<typename Args>
+	[[nodiscard]] constexpr auto MakeBoxFrom(Args&& args) {
+	    return Box<typename Args::Type>::MakeFrom(Forward<Args>(args));
 	}
 } // namespace Nrl

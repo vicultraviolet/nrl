@@ -129,4 +129,9 @@ namespace Nrl {
 
     template<typename F, typename... Args>
     using InvokeResult_t = typename InvokeResult<F, Args...>::Type;
+
+    template<typename T>
+    concept c_HasMake = requires(T t) {
+        { t.make() };
+    };
 } // namespace Nrl

@@ -28,16 +28,21 @@ namespace Nrl {
     template<typename T>
     class NonIntrusiveOption {
     public:
-        template<typename F, typename... Args>
-        [[nodiscard]] static NonIntrusiveOption SomeWith(F&& factory, Args&&... args) {
-            return NonIntrusiveOption(k_InPlace, factory, Forward<Args>(args)...);
-        }
-
         template<typename... Args>
         [[nodiscard]] static NonIntrusiveOption Some(Args&&... args) {
             return SomeWith([](Args&&... args) -> T {
                 return T(Forward<Args>(args)...);
             }, Forward<Args>(args)...);
+        }
+
+        template<typename F, typename... Args>
+        [[nodiscard]] static NonIntrusiveOption SomeWith(F&& factory, Args&&... args) {
+            return NonIntrusiveOption(k_InPlace, factory, Forward<Args>(args)...);
+        }
+
+        template<c_HasMake Args>
+        [[nodiscard]] static NonIntrusiveOption SomeFrom(Args&& args) {
+            return NonIntrusiveOption(k_InPlace, k_InPlace, Forward<Args>(args));
         }
 
         [[nodiscard]] static NonIntrusiveOption None(void) {
@@ -98,6 +103,9 @@ namespace Nrl {
     private:
         template<typename F, typename... Args>
         NonIntrusiveOption(InPlaceTag, F&& factory, Args&&... args) : m_Data(factory(Forward<Args>(args)...)) {}
+
+        template<c_HasMake Args>
+        NonIntrusiveOption(InPlaceTag, InPlaceTag, Args&& args) : m_Data(Forward<Args>(args).make()) {}
     private:
         T m_Data;
     };
@@ -105,6 +113,16 @@ namespace Nrl {
     template<typename T>
     class IntrusiveOption {
     public:
+        template<typename... Args>
+        [[nodiscard]] static IntrusiveOption Some(Args&&... args) {
+            IntrusiveOption t;
+
+            new (t._ptr()) T(Forward<Args>(args)...);
+            t.m_IsSome = true;
+
+            return t;
+        }
+
         template<typename F, typename... Args>
         [[nodiscard]] static IntrusiveOption SomeWith(F&& factory, Args&&... args) {
             IntrusiveOption t;
@@ -115,11 +133,11 @@ namespace Nrl {
             return t;
         }
 
-        template<typename... Args>
-        [[nodiscard]] static IntrusiveOption Some(Args&&... args) {
+        template<c_HasMake Args>
+        [[nodiscard]] static IntrusiveOption SomeFrom(Args&& args) {
             IntrusiveOption t;
 
-            new (t._ptr()) T(Forward<Args>(args)...);
+            new (t._ptr()) T(Forward<Args>(args).make());
             t.m_IsSome = true;
 
             return t;
@@ -231,13 +249,22 @@ namespace Nrl {
         bool m_IsSome;
     };
 
+    template<typename T>
+    [[nodiscard]] constexpr Option<T> Some(T&& t) { return Option<T>::Some(Forward<T>(t)); }
+
     template<typename T, typename... Args>
-    [[nodiscard]] constexpr Option<T> Some(Args&&... args) { return Option<T>::Some(Forward<Args>(args)...); }
+    [[nodiscard]] constexpr Option<T> MakeSome(Args&&... args) { return Option<T>::Some(Forward<Args>(args)...); }
 
     template<typename F, typename... Args>
     [[nodiscard]] constexpr auto SomeWith(F&& factory, Args&&... args) {
         using T = InvokeResult_t<F, Args...>;
         return Option<T>::SomeWith(Forward<F>(factory), Forward<Args>(args)...);
+    }
+
+    template<c_HasMake Args>
+    [[nodiscard]] constexpr auto SomeFrom(Args&& args) {
+        using T = Args::Type;
+        return Option<T>::SomeFrom(Forward<Args>(args));
     }
 
     [[nodiscard]] constexpr None_t None(void) { return None_t{}; }
