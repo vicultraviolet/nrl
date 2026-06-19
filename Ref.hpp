@@ -1,6 +1,7 @@
 #pragma once
 
 #include "./Utils.hpp"
+#include "./Debug.hpp"
 
 namespace Nrl {
     // non owning, non zero reference (unless inside Option)
@@ -9,6 +10,10 @@ namespace Nrl {
     public:
         [[nodiscard]] static Ref New(T& referenced) {
             return &referenced;
+        }
+        [[nodiscard]] static Ref FromPtr(T* ptr) {
+            NRL_ASSERT(ptr, "Failed to create Ref: ptr is null!");
+            return ptr;
         }
 
         ~Ref(void) { m_Ptr = nullptr; }
@@ -40,6 +45,18 @@ namespace Nrl {
 		[[nodiscard]] constexpr auto operator<=>(const Ref& other) const { return m_Ptr <=> other.m_Ptr; }
 		[[nodiscard]] constexpr auto operator==(const Ref& other) const { return m_Ptr == other.m_Ptr; }
 
+		constexpr Ref& operator++(void) { m_Ptr++; return *this; }
+		constexpr Ref  operator++(int) { m_Ptr++; return m_Ptr - 1; }
+
+		constexpr Ref& operator--(void) { m_Ptr--; return *this; }
+		constexpr Ref  operator--(int) { m_Ptr--; return m_Ptr + 1; }
+
+		constexpr Ref& operator+=(size_t x) { m_Ptr += x; return *this; }
+		constexpr Ref& operator-=(size_t x) { m_Ptr -= x; return *this; }
+
+		[[nodiscard]] constexpr Ref operator+(size_t x) const { return m_Ptr + x; }
+		[[nodiscard]] constexpr Ref operator-(size_t x) const { return m_Ptr - x; }
+
 		template<typename U>
 		[[nodiscard]] explicit operator Ref<U>(void) { return Ref<U>::New(*(U*)m_Ptr); }
 
@@ -51,4 +68,9 @@ namespace Nrl {
         T* m_Ptr;
     };
 
+    template<typename T>
+    [[nodiscard]] Ref<T> NewRef(T& referenced) { return Ref<T>::New(referenced); }
+
+    template<typename T>
+    [[nodiscard]] Ref<T> RefFromPtr(T* ptr) { return Ref<T>::FromPtr(ptr); }
 } // namespace Nrl

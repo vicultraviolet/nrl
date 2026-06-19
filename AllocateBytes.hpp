@@ -11,7 +11,7 @@ namespace Nrl {
         if (!ptr)
             NRL_PANIC("Bad alloc!");
 
-        return Ref<ubyte>::New(*(ubyte*)ptr);
+        return RefFromPtr((ubyte*)ptr);
     }
 
     [[nodiscard]] inline Option<Ref<ubyte>> TryAllocateBytes(size_t size, size_t alignment) noexcept {
@@ -19,7 +19,7 @@ namespace Nrl {
         if (!ptr)
             return None();
 
-        return SomeWith(Ref<ubyte>::New, *(ubyte*)ptr);
+        return SomeWith(Ref<ubyte>::FromPtr, (ubyte*)ptr);
     }
 
     inline void DeallocateBytes(Ref<ubyte> ref) noexcept {
