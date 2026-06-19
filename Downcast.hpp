@@ -10,6 +10,6 @@ namespace Nrl {
 		if (!casted)
 		    return None();
 
-		return SomeWith(Ref<To>::New, *casted);
+		return SomeWith(Ref<To>::FromPtr, casted);
 	}
 } // namespace Nrl
