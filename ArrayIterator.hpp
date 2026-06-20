@@ -33,8 +33,13 @@ namespace Nrl {
 
 		[[nodiscard]] constexpr Reversed reverse(void) { return m_Ref; }
 
-		[[nodiscard]] constexpr bool operator==(const ArrayIterator& other)  const { return m_Ref == other.m_Ref; }
-		[[nodiscard]] constexpr auto operator<=>(const ArrayIterator& other) const { return m_Ref <=> other.m_Ref; }
+		[[nodiscard]] constexpr bool operator==(const ArrayIterator& other) const { return m_Ref == other.m_Ref; }
+		[[nodiscard]] constexpr bool operator!=(const ArrayIterator& other) const { return m_Ref != other.m_Ref; }
+		[[nodiscard]] constexpr bool operator> (const ArrayIterator& other) const { return m_Ref >  other.m_Ref; }
+		[[nodiscard]] constexpr bool operator< (const ArrayIterator& other) const { return m_Ref <  other.m_Ref; }
+		[[nodiscard]] constexpr bool operator>=(const ArrayIterator& other) const { return m_Ref >= other.m_Ref; }
+		[[nodiscard]] constexpr bool operator<=(const ArrayIterator& other) const { return m_Ref <= other.m_Ref; }
+
 
 		[[nodiscard]] static ArrayIterator _None(void) { return Ref<T>::_None(); }
 		[[nodiscard]] constexpr bool _is_some(void) const { return m_Ref._is_some(); }
@@ -72,8 +77,12 @@ namespace Nrl {
 
 		[[nodiscard]] constexpr Reversed reverse(void) { return m_Ref; }
 
-		[[nodiscard]] constexpr bool operator==(const ArrayConstIterator& other)  const { return m_Ref == other.m_Ref; }
-		[[nodiscard]] constexpr auto operator<=>(const ArrayConstIterator& other) const { return m_Ref <=> other.m_Ref; }
+		[[nodiscard]] constexpr bool operator==(const ArrayConstIterator& other) const { return m_Ref == other.m_Ref; }
+		[[nodiscard]] constexpr bool operator!=(const ArrayConstIterator& other) const { return m_Ref != other.m_Ref; }
+		[[nodiscard]] constexpr bool operator> (const ArrayConstIterator& other) const { return m_Ref >  other.m_Ref; }
+		[[nodiscard]] constexpr bool operator< (const ArrayConstIterator& other) const { return m_Ref <  other.m_Ref; }
+		[[nodiscard]] constexpr bool operator>=(const ArrayConstIterator& other) const { return m_Ref >= other.m_Ref; }
+		[[nodiscard]] constexpr bool operator<=(const ArrayConstIterator& other) const { return m_Ref <= other.m_Ref; }
 
 		[[nodiscard]] static ArrayConstIterator _None(void) { return Ref<T>::_None(); }
 		[[nodiscard]] constexpr bool _is_some(void) const { return m_Ref._is_some(); }
@@ -111,8 +120,12 @@ namespace Nrl {
 
 		[[nodiscard]] constexpr Reversed reverse(void) { return m_Ref; }
 
-		[[nodiscard]] constexpr bool operator==(const ArrayReverseIterator& other)  const { return m_Ref == other.m_Ref; }
-		[[nodiscard]] constexpr auto operator<=>(const ArrayReverseIterator& other) const { return other.m_Ref <=> m_Ref; }
+		[[nodiscard]] constexpr bool operator==(const ArrayReverseIterator& other) const { return other.m_Ref == m_Ref; }
+		[[nodiscard]] constexpr bool operator!=(const ArrayReverseIterator& other) const { return other.m_Ref != m_Ref; }
+		[[nodiscard]] constexpr bool operator> (const ArrayReverseIterator& other) const { return other.m_Ref >  m_Ref; }
+		[[nodiscard]] constexpr bool operator< (const ArrayReverseIterator& other) const { return other.m_Ref <  m_Ref; }
+		[[nodiscard]] constexpr bool operator>=(const ArrayReverseIterator& other) const { return other.m_Ref >= m_Ref; }
+		[[nodiscard]] constexpr bool operator<=(const ArrayReverseIterator& other) const { return other.m_Ref <= m_Ref; }
 
 		[[nodiscard]] static ArrayReverseIterator _None(void) { return Ref<T>::_None(); }
 		[[nodiscard]] constexpr bool _is_some(void) const { return m_Ref._is_some(); }
@@ -150,8 +163,12 @@ namespace Nrl {
 
 		[[nodiscard]] constexpr Reversed reverse(void) { return m_Ref; }
 
-		[[nodiscard]] constexpr bool operator==(const ArrayConstReverseIterator& other)  const { return m_Ref == other.m_Ref; }
-		[[nodiscard]] constexpr auto operator<=>(const ArrayConstReverseIterator& other) const { return other.m_Ref <=> m_Ref; }
+		[[nodiscard]] constexpr bool operator==(const ArrayConstReverseIterator& other) const { return other.m_Ref == m_Ref; }
+		[[nodiscard]] constexpr bool operator!=(const ArrayConstReverseIterator& other) const { return other.m_Ref != m_Ref; }
+		[[nodiscard]] constexpr bool operator> (const ArrayConstReverseIterator& other) const { return other.m_Ref >  m_Ref; }
+		[[nodiscard]] constexpr bool operator< (const ArrayConstReverseIterator& other) const { return other.m_Ref <  m_Ref; }
+		[[nodiscard]] constexpr bool operator>=(const ArrayConstReverseIterator& other) const { return other.m_Ref >= m_Ref; }
+		[[nodiscard]] constexpr bool operator<=(const ArrayConstReverseIterator& other) const { return other.m_Ref <= m_Ref; }
 
 		[[nodiscard]] static ArrayConstReverseIterator _None(void) { return Ref<T>::_None(); }
 		[[nodiscard]] constexpr bool _is_some(void) const { return m_Ref._is_some(); }
