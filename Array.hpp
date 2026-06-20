@@ -64,7 +64,7 @@ namespace Nrl {
             Array a;
 
             for (auto it = a.begin(); it != a.end(); it++)
-                new (it.ptr()) T(factory(Forward<Args>(args)...));
+                new (it.ptr()) T(factory(args...));
 
             return a;
         }
