@@ -13,7 +13,7 @@ namespace Nrl {
         using ReverseIterator = ArrayReverseIterator<BoundedArray>;
         using ConstReverseIterator = ArrayConstReverseIterator<BoundedArray>;
     public:
-        [[nodiscard]] static BoundedArray Default(void) { return BoundedArray(); }
+        [[nodiscard]] static BoundedArray Empty(void) { return BoundedArray(); }
 
         template<typename... Args>
         [[nodiscard]] static BoundedArray New(Args&&... args) {

@@ -14,15 +14,6 @@ namespace Nrl {
         using ReverseIterator = ArrayReverseIterator<Array>;
         using ConstReverseIterator = ArrayConstReverseIterator<Array>;
     public:
-        [[nodiscard]] static Array Default(void) {
-            Array a;
-
-            for (size_t i = 0; i < L; i++)
-                new (a._ptr_at(i)) T(T::Default());
-
-            return a;
-        }
-
         template<typename... Args>
         [[nodiscard]] static Array New(Args&&... args) {
             Array a;
