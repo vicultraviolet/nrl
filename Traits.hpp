@@ -1,5 +1,7 @@
 #pragma once
 
+#include "./Primitives.hpp"
+
 namespace Nrl {
     template<typename T, T v>
     struct IntegralConstant {
@@ -133,5 +135,38 @@ namespace Nrl {
     template<typename T>
     concept c_HasMake = requires(T t) {
         { t.make() };
+    };
+
+    template<typename T>
+    concept c_Readable = requires(T t) {
+        typename T::ValueType;
+        { *t } -> c_SameAs<typename T::ValueType&>;
+        { t.operator->() } -> c_SameAs<typename T::ValueType*>;
+    };
+
+    template<typename T>
+    concept c_Incrementable = requires(T t) {
+        { ++t } -> c_SameAs<T&>;
+        { t++ } -> c_SameAs<T>;
+    };
+
+    template<typename T>
+    concept c_Decrementable = requires(T t) {
+        { --t } -> c_SameAs<T&>;
+        { t-- } -> c_SameAs<T>;
+    };
+
+    template<typename T>
+    concept c_EqualityComparable = requires(T a, T b) {
+        { a == b } -> c_SameAs<bool>;
+        { a != b } -> c_SameAs<bool>;
+    };
+
+    template<typename T>
+    concept c_TotallyOrdered = requires(T a, T b) {
+        { a <  b } -> c_SameAs<bool>;
+        { a >  b } -> c_SameAs<bool>;
+        { a <= b } -> c_SameAs<bool>;
+        { a >= b } -> c_SameAs<bool>;
     };
 } // namespace Nrl
