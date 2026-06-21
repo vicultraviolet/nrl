@@ -86,12 +86,12 @@ namespace Nrl {
 
     template<typename... Signature>
     struct TupleLength<Tuple<Signature...>>
-        : IntegralConstant<size_t, sizeof...(Signature)> {};
+        : IntegralConstant<usize, sizeof...(Signature)> {};
 
     template<typename... Signature>
-    constexpr size_t TupleLength_v = TupleLength<Tuple<Signature...>>::value;
+    constexpr usize TupleLength_v = TupleLength<Tuple<Signature...>>::value;
 
-    template<size_t I, typename T>
+    template<usize I, typename T>
     struct TupleElement;
 
     template<typename Head, typename... Tail>
@@ -104,11 +104,11 @@ namespace Nrl {
         using Type = typename TupleElement<I - 1, Tuple<Tail...>>::Type;
     };
 
-    template<size_t I, typename T>
+    template<usize I, typename T>
     using TupleElement_t = typename TupleElement<I, T>::Type;
 
     namespace Details {
-        template<size_t I, typename... Signature>
+        template<usize I, typename... Signature>
         struct GetImpl;
 
         template<typename Head, typename... Tail>
@@ -128,28 +128,28 @@ namespace Nrl {
         };
     } // namespace Details
 
-    template<size_t I, typename... Signature>
+    template<usize I, typename... Signature>
     [[nodiscard]] constexpr auto& Get(Tuple<Signature...>& t) {
         static_assert(I < sizeof...(Signature), "Failed to get element from tuple: Out of bounds!");
         return Details::GetImpl<I, Signature...>::Apply(t);
     }
 
-    template<size_t I, typename... Signature>
+    template<usize I, typename... Signature>
     [[nodiscard]] constexpr const auto& Get(const Tuple<Signature...>& t) {
         static_assert(I < sizeof...(Signature), "Failed to get element from tuple: Out of bounds!");
         return Details::GetImpl<I, Signature...>::Apply(t);
     }
 
-    template<size_t I, typename... Signature>
+    template<usize I, typename... Signature>
     [[nodiscard]] constexpr auto&& Get(Tuple<Signature...>&& t) { return Move(Get<I>(t)); }
 
     namespace Details {
-        template<typename T, typename Tuple, size_t... I>
+        template<typename T, typename Tuple, usize... I>
         [[nodiscard]] constexpr T NewFromTupleImpl(Tuple&& t, IndexSequence<I...>) {
             return T(Get<I>(Forward<Tuple>(t))...);
         }
 
-        template<typename T, typename F, typename Tuple, size_t... I>
+        template<typename T, typename F, typename Tuple, usize... I>
         [[nodiscard]] constexpr T CallWithTupleImpl(F&& f, Tuple&& t, IndexSequence<I...>) {
             return f(Get<I>(Forward<Tuple>(t))...);
         }

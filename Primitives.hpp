@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <float.h>
 #include <stdint.h>
 
@@ -38,12 +39,21 @@ namespace Nrl {
         constexpr b8 k_True  = 1;
 
         using ubyte = unsigned char;
+        constexpr ubyte ubytemax = u8max;
+
+        using usize = size_t;
+        constexpr usize usizemax = SIZE_MAX;
 
         using uptr = uintptr_t;
-        using iptr = ptrdiff_t;
+        constexpr uptr uptrmax = UINTPTR_MAX;
 
-        constexpr size_t k_PtrSize = sizeof(void*);
-        
+        using iptr = ptrdiff_t;
+        constexpr iptr iptrmax = PTRDIFF_MAX;
+
+        using utf8char = char8_t;
+
+        constexpr usize ptrsize = sizeof(void*);
+
         using nullptr_t = decltype(nullptr);
     } // namespace Primitives
     using namespace Primitives;

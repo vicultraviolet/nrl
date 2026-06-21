@@ -4,7 +4,7 @@
 #include "./ArrayIterator.hpp"
 
 namespace Nrl {
-    template<typename T, size_t C>
+    template<typename T, usize C>
     class BoundedArray {
     public:
         using ValueType = T;
@@ -38,7 +38,7 @@ namespace Nrl {
         }
 
         template<typename... Args>
-        [[nodiscard]] static BoundedArray Fill(size_t length, const Args&... args) {
+        [[nodiscard]] static BoundedArray Fill(usize length, const Args&... args) {
             BoundedArray a;
 
             while (a.m_Length != length)
@@ -48,7 +48,7 @@ namespace Nrl {
         }
 
         template<typename F, typename... Args>
-        [[nodiscard]] static BoundedArray FillWith(size_t length, F&& factory, const Args&... args) {
+        [[nodiscard]] static BoundedArray FillWith(usize length, F&& factory, const Args&... args) {
             BoundedArray a;
 
             while (a.m_Length != length)
@@ -58,7 +58,7 @@ namespace Nrl {
         }
 
         template<typename Args>
-        [[nodiscard]] static BoundedArray FillFrom(size_t length, Args&& args) {
+        [[nodiscard]] static BoundedArray FillFrom(usize length, Args&& args) {
             BoundedArray a;
 
             while (a.m_Length != length)
@@ -78,7 +78,7 @@ namespace Nrl {
                 return *this;
 
             if (m_Length == other.m_Length) {
-                size_t i = 0;
+                usize i = 0;
                 for (auto it = begin(); it != end(); it++)
                     *it = other[i++];
             } else
@@ -86,12 +86,12 @@ namespace Nrl {
                 while (m_Length != other.m_Length)
                     pop();
 
-                size_t i = 0;
+                usize i = 0;
                 for (auto it = begin(); it != end(); it++)
                     *it = other[i++];
             } else
             if (m_Length < other.m_Length) {
-                size_t i = 0;
+                usize i = 0;
                 for (auto it = begin(); it != end(); it++)
                     *it = other[i++];
 
@@ -111,7 +111,7 @@ namespace Nrl {
                 return *this;
 
             if (m_Length == other.m_Length) {
-                size_t i = 0;
+                usize i = 0;
                 for (auto it = begin(); it != end(); it++)
                     *it = Move(other[i++]);
             } else
@@ -119,12 +119,12 @@ namespace Nrl {
                 while (m_Length != other.m_Length)
                     pop();
 
-                size_t i = 0;
+                usize i = 0;
                 for (auto it = begin(); it != end(); it++)
                     *it = Move(other[i++]);
             } else
             if (m_Length < other.m_Length) {
-                size_t i = 0;
+                usize i = 0;
                 for (auto it = begin(); it != end(); it++)
                     *it = Move(other[i++]);
 
@@ -136,19 +136,19 @@ namespace Nrl {
         }
 
         template<typename... Args>
-        size_t emplace(Args&&... args) {
+        usize emplace(Args&&... args) {
             new (_ptr_at(m_Length)) T(Forward<Args>(args)...);
             return m_Length++;
         }
 
         template<typename F, typename... Args>
-        size_t emplace_with(F&& factory, Args&&... args) {
+        usize emplace_with(F&& factory, Args&&... args) {
             new (_ptr_at(m_Length)) T(factory(Forward<Args>(args)...));
             return m_Length++;
         }
 
         template<c_HasMake Args>
-        size_t emplace_from(Args&& args) {
+        usize emplace_from(Args&& args) {
             new (_ptr_at(m_Length)) T(Forward<Args>(args).make());
             return m_Length++;
         }
@@ -162,11 +162,11 @@ namespace Nrl {
                 pop();
         }
 
-        [[nodiscard]] constexpr Iterator at(size_t i) { return ref() + i; }
-        [[nodiscard]] constexpr ConstIterator at(size_t i) const { return ref() + i; }
+        [[nodiscard]] constexpr Iterator at(usize i) { return ref() + i; }
+        [[nodiscard]] constexpr ConstIterator at(usize i) const { return ref() + i; }
 
-        [[nodiscard]] constexpr ReverseIterator rat(size_t i) { return at(m_Length).reverse() + 1 + i; }
-        [[nodiscard]] constexpr ConstReverseIterator rat(size_t i) const { return at(m_Length).reverse() + 1 + i; }
+        [[nodiscard]] constexpr ReverseIterator rat(usize i) { return at(m_Length).reverse() + 1 + i; }
+        [[nodiscard]] constexpr ConstReverseIterator rat(usize i) const { return at(m_Length).reverse() + 1 + i; }
 
         [[nodiscard]] constexpr Iterator begin(void) { return at(0); }
         [[nodiscard]] constexpr Iterator end(void) { return at(m_Length); }
@@ -180,25 +180,25 @@ namespace Nrl {
         [[nodiscard]] constexpr ConstReverseIterator rbegin(void) const { return rat(0); }
         [[nodiscard]] constexpr ConstReverseIterator rend(void) const { return rat(m_Length); }
 
-        [[nodiscard]] constexpr T& operator[](size_t i) { return *(ref() + i); }
-        [[nodiscard]] constexpr const T& operator[](size_t i) const { return *(ref() + i); }
+        [[nodiscard]] constexpr T& operator[](usize i) { return *(ref() + i); }
+        [[nodiscard]] constexpr const T& operator[](usize i) const { return *(ref() + i); }
 
         [[nodiscard]] constexpr Ref<T> ref(void) { return RefFromPtr((T*)m_Data); }
         [[nodiscard]] constexpr Ref<const T> ref(void) const { return RefFromPtr((const T*)m_Data); }
 
-        [[nodiscard]] constexpr size_t length(void) const { return m_Length; }
-        [[nodiscard]] constexpr size_t capacity(void) const { return C; }
+        [[nodiscard]] constexpr usize length(void) const { return m_Length; }
+        [[nodiscard]] constexpr usize capacity(void) const { return C; }
 
-        [[nodiscard]] constexpr size_t size(void) const { return m_Length * sizeof(T); }
-        [[nodiscard]] constexpr size_t max_size(void) const { return C * sizeof(T); }
+        [[nodiscard]] constexpr usize size(void) const { return m_Length * sizeof(T); }
+        [[nodiscard]] constexpr usize max_size(void) const { return C * sizeof(T); }
     private:
-        [[nodiscard]] constexpr T* _ptr_at(size_t i) { return (ref() + i).ptr(); }
-        [[nodiscard]] constexpr const T* _ptr_at(size_t i) const { return (ref() + i).ptr(); }
+        [[nodiscard]] constexpr T* _ptr_at(usize i) { return (ref() + i).ptr(); }
+        [[nodiscard]] constexpr const T* _ptr_at(usize i) const { return (ref() + i).ptr(); }
 
         BoundedArray(void) = default;
     private:
         alignas(T) ubyte m_Data[C * sizeof(T)];
-        size_t m_Length = 0;
+        usize m_Length = 0;
     };
 
     template<typename T, typename... Args>

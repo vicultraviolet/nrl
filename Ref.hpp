@@ -56,11 +56,11 @@ namespace Nrl {
 		constexpr Ref& operator--(void) { m_Ptr--; return *this; }
 		constexpr Ref  operator--(int) { m_Ptr--; return m_Ptr + 1; }
 
-		constexpr Ref& operator+=(size_t x) { m_Ptr += x; return *this; }
-		constexpr Ref& operator-=(size_t x) { m_Ptr -= x; return *this; }
+		constexpr Ref& operator+=(usize x) { m_Ptr += x; return *this; }
+		constexpr Ref& operator-=(usize x) { m_Ptr -= x; return *this; }
 
-		[[nodiscard]] constexpr Ref operator+(size_t x) const { return m_Ptr + x; }
-		[[nodiscard]] constexpr Ref operator-(size_t x) const { return m_Ptr - x; }
+		[[nodiscard]] constexpr Ref operator+(usize x) const { return m_Ptr + x; }
+		[[nodiscard]] constexpr Ref operator-(usize x) const { return m_Ptr - x; }
 
 		[[nodiscard]] constexpr iptr operator-(Ref other) const { return m_Ptr - other.m_Ptr; }
 

@@ -19,11 +19,11 @@ namespace Nrl {
 		constexpr auto& operator--(void) { m_Ref--; return *this; }
 		constexpr auto  operator--(int) { return ArrayIterator(m_Ref--); }
 
-		constexpr auto& operator+=(size_t x) { m_Ref += x; return *this; }
-		constexpr auto& operator-=(size_t x) { m_Ref -= x; return *this; }
+		constexpr auto& operator+=(usize x) { m_Ref += x; return *this; }
+		constexpr auto& operator-=(usize x) { m_Ref -= x; return *this; }
 
-		[[nodiscard]] constexpr ArrayIterator operator+(size_t x) const { return m_Ref + x; }
-		[[nodiscard]] constexpr ArrayIterator operator-(size_t x) const { return m_Ref - x; }
+		[[nodiscard]] constexpr ArrayIterator operator+(usize x) const { return m_Ref + x; }
+		[[nodiscard]] constexpr ArrayIterator operator-(usize x) const { return m_Ref - x; }
 
 		[[nodiscard]] constexpr iptr operator-(ArrayIterator other) const { return m_Ref - other.m_Ref; }
 
@@ -65,11 +65,11 @@ namespace Nrl {
 		constexpr auto& operator--(void) { m_Ref--; return *this; }
 		constexpr auto  operator--(int) { return ArrayConstIterator(m_Ref--); }
 
-		constexpr auto& operator+=(size_t x) { m_Ref += x; return *this; }
-		constexpr auto& operator-=(size_t x) { m_Ref -= x; return *this; }
+		constexpr auto& operator+=(usize x) { m_Ref += x; return *this; }
+		constexpr auto& operator-=(usize x) { m_Ref -= x; return *this; }
 
-		[[nodiscard]] constexpr ArrayConstIterator operator+(size_t x) const { return m_Ref + x; }
-		[[nodiscard]] constexpr ArrayConstIterator operator-(size_t x) const { return m_Ref - x; }
+		[[nodiscard]] constexpr ArrayConstIterator operator+(usize x) const { return m_Ref + x; }
+		[[nodiscard]] constexpr ArrayConstIterator operator-(usize x) const { return m_Ref - x; }
 
 		[[nodiscard]] constexpr iptr operator-(ArrayConstIterator other) const { return m_Ref - other.m_Ref; }
 
@@ -110,11 +110,11 @@ namespace Nrl {
 		constexpr auto& operator--(void) { m_Ref++; return *this; }
 		constexpr auto  operator--(int) { return ArrayReverseIterator(m_Ref++); }
 
-		constexpr auto& operator+=(size_t x) { m_Ref -= x; return *this; }
-		constexpr auto& operator-=(size_t x) { m_Ref += x; return *this; }
+		constexpr auto& operator+=(usize x) { m_Ref -= x; return *this; }
+		constexpr auto& operator-=(usize x) { m_Ref += x; return *this; }
 
-		[[nodiscard]] constexpr ArrayReverseIterator operator+(size_t x) const { return m_Ref - x; }
-		[[nodiscard]] constexpr ArrayReverseIterator operator-(size_t x) const { return m_Ref + x; }
+		[[nodiscard]] constexpr ArrayReverseIterator operator+(usize x) const { return m_Ref - x; }
+		[[nodiscard]] constexpr ArrayReverseIterator operator-(usize x) const { return m_Ref + x; }
 
 		[[nodiscard]] constexpr iptr operator-(ArrayReverseIterator other) const { return other.m_Ref - m_Ref; }
 
@@ -156,11 +156,11 @@ namespace Nrl {
 		constexpr auto& operator--(void) { m_Ref++; return *this; }
 		constexpr auto  operator--(int) { return ArrayConstReverseIterator(m_Ref++); }
 
-		constexpr auto& operator+=(size_t x) { m_Ref -= x; return *this; }
-		constexpr auto& operator-=(size_t x) { m_Ref += x; return *this; }
+		constexpr auto& operator+=(usize x) { m_Ref -= x; return *this; }
+		constexpr auto& operator-=(usize x) { m_Ref += x; return *this; }
 
-		[[nodiscard]] constexpr ArrayConstReverseIterator operator+(size_t x) const { return m_Ref - x; }
-		[[nodiscard]] constexpr ArrayConstReverseIterator operator-(size_t x) const { return m_Ref + x; }
+		[[nodiscard]] constexpr ArrayConstReverseIterator operator+(usize x) const { return m_Ref - x; }
+		[[nodiscard]] constexpr ArrayConstReverseIterator operator-(usize x) const { return m_Ref + x; }
 
 		[[nodiscard]] constexpr iptr operator-(ArrayConstReverseIterator other) const { return other.m_Ref - m_Ref; }
 

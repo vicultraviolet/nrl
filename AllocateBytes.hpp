@@ -6,7 +6,7 @@
 #include "./Option.hpp"
 
 namespace Nrl {
-    [[nodiscard]] inline Ref<ubyte> AllocateBytes(size_t size, size_t alignment) {
+    [[nodiscard]] inline Ref<ubyte> AllocateBytes(usize size, usize alignment) {
         void* ptr = AllocateAligned(size, alignment);
         if (!ptr)
             NRL_PANIC("Bad alloc!");
@@ -14,7 +14,7 @@ namespace Nrl {
         return RefFromPtr((ubyte*)ptr);
     }
 
-    [[nodiscard]] inline Option<Ref<ubyte>> TryAllocateBytes(size_t size, size_t alignment) noexcept {
+    [[nodiscard]] inline Option<Ref<ubyte>> TryAllocateBytes(usize size, usize alignment) noexcept {
         void* ptr = AllocateAligned(size, alignment);
         if (!ptr)
             return None();

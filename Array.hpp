@@ -5,7 +5,7 @@
 #include "./ArrayIterator.hpp"
 
 namespace Nrl {
-    template<typename T, size_t L>
+    template<typename T, usize L>
     class Array {
     public:
         using ValueType = T;
@@ -18,7 +18,7 @@ namespace Nrl {
         [[nodiscard]] static Array New(Args&&... args) {
             Array a;
 
-            size_t i = 0;
+            usize i = 0;
             ((void)[&](void) {
                 new (a._ptr_at(i)) T(Forward<Args>(args));
                 i++;
@@ -31,7 +31,7 @@ namespace Nrl {
         [[nodiscard]] static Array NewFrom(Args&&... args) {
             Array a;
 
-            size_t i = 0;
+            usize i = 0;
             ((void)[&](void) {
                 new (a._ptr_at(i)) T(Forward<Args>(args).make());
                 i++;
@@ -76,7 +76,7 @@ namespace Nrl {
         }
 
         Array(const Array& other) {
-            size_t i = 0;
+            usize i = 0;
             for (auto it = begin(); it != end(); it++)
                 new (it.ptr()) T(other[i++]);
         }
@@ -84,7 +84,7 @@ namespace Nrl {
             if (this == &other)
                 return *this;
 
-            size_t i = 0;
+            usize i = 0;
             for (auto it = begin(); it != end(); it++)
                 *it = other[i++];
 
@@ -92,7 +92,7 @@ namespace Nrl {
         }
 
         Array(Array&& other) noexcept {
-            size_t i = 0;
+            usize i = 0;
             for (auto it = begin(); it != end(); it++)
                 new (it.ptr()) T(Move(other[i++]));
         }
@@ -100,18 +100,18 @@ namespace Nrl {
             if (this == &other)
                 return *this;
 
-            size_t i = 0;
+            usize i = 0;
             for (auto it = begin(); it != end(); it++)
                 *it = Move(other[i++]);
 
             return *this;
         }
 
-        [[nodiscard]] constexpr Iterator at(size_t i) { return ref() + i; }
-        [[nodiscard]] constexpr ConstIterator at(size_t i) const { return ref() + i; }
+        [[nodiscard]] constexpr Iterator at(usize i) { return ref() + i; }
+        [[nodiscard]] constexpr ConstIterator at(usize i) const { return ref() + i; }
 
-        [[nodiscard]] constexpr ReverseIterator rat(size_t i) { return at(L).reverse() + 1 + i; }
-        [[nodiscard]] constexpr ConstReverseIterator rat(size_t i) const { return at(L).reverse() + 1 + i; }
+        [[nodiscard]] constexpr ReverseIterator rat(usize i) { return at(L).reverse() + 1 + i; }
+        [[nodiscard]] constexpr ConstReverseIterator rat(usize i) const { return at(L).reverse() + 1 + i; }
 
         [[nodiscard]] constexpr Iterator begin(void) { return at(0); }
         [[nodiscard]] constexpr Iterator end(void) { return at(L); }
@@ -125,20 +125,20 @@ namespace Nrl {
         [[nodiscard]] constexpr ConstReverseIterator rbegin(void) const { return rat(0); }
         [[nodiscard]] constexpr ConstReverseIterator rend(void) const { return rat(L); }
 
-        [[nodiscard]] constexpr T& operator[](size_t i) { return *(ref() + i); }
-        [[nodiscard]] constexpr const T& operator[](size_t i) const { return *(ref() + i); }
+        [[nodiscard]] constexpr T& operator[](usize i) { return *(ref() + i); }
+        [[nodiscard]] constexpr const T& operator[](usize i) const { return *(ref() + i); }
 
         [[nodiscard]] constexpr Ref<T> ref(void) { return RefFromPtr((T*)m_Data); }
         [[nodiscard]] constexpr Ref<const T> ref(void) const { return RefFromPtr((const T*)m_Data); }
 
-        [[nodiscard]] constexpr size_t length(void) const { return L; }
-        [[nodiscard]] constexpr size_t capacity(void) const { return L; }
+        [[nodiscard]] constexpr usize length(void) const { return L; }
+        [[nodiscard]] constexpr usize capacity(void) const { return L; }
 
-        [[nodiscard]] constexpr size_t size(void) const { return L * sizeof(T); }
-        [[nodiscard]] constexpr size_t max_size(void) const { return L * sizeof(T); }
+        [[nodiscard]] constexpr usize size(void) const { return L * sizeof(T); }
+        [[nodiscard]] constexpr usize max_size(void) const { return L * sizeof(T); }
     private:
-        [[nodiscard]] constexpr T* _ptr_at(size_t i) { return (ref() + i).ptr(); }
-        [[nodiscard]] constexpr const T* _ptr_at(size_t i) const { return (ref() + i).ptr(); }
+        [[nodiscard]] constexpr T* _ptr_at(usize i) { return (ref() + i).ptr(); }
+        [[nodiscard]] constexpr const T* _ptr_at(usize i) const { return (ref() + i).ptr(); }
 
         Array(void) = default;
     private:
@@ -155,12 +155,12 @@ namespace Nrl {
         return Array<typename First::Type, sizeof...(Args)+1>::NewFrom(Forward<First>(first), Forward<Args>(args)...);
     }
 
-    template<size_t L, typename F, typename... Args>
+    template<usize L, typename F, typename... Args>
     [[nodiscard]] auto FillArrayWith(F&& factory, const Args&... args) {
         return Array<InvokeResult_t<F, Args...>, L>::Fill(Forward<F>(factory), args...);
     }
 
-    template<size_t L, typename Args>
+    template<usize L, typename Args>
     [[nodiscard]] auto FillArrayFrom(Args&& args) {
         return Array<typename Args::Type, L>::FillFrom(Forward<Args>(args));
     }

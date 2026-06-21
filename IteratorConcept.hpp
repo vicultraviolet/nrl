@@ -13,7 +13,7 @@ namespace Nrl {
     concept c_RandomAccessIterator =
         c_BidirectionalIterator<It> &&
         c_TotallyOrdered<It> &&
-        requires(It it, size_t n) {
+        requires(It it, usize n) {
             { it += n } -> c_SameAs<It&>;
             { it -= n } -> c_SameAs<It&>;
             { it +  n } -> c_SameAs<It>;

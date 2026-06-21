@@ -10,10 +10,10 @@ namespace Nrl {
 
         [[nodiscard]] static constexpr auto New(void) { return AlignedHeapAllocator(); }
 
-        [[nodiscard]] Ref<T> alloc(size_t length) {
+        [[nodiscard]] Ref<T> alloc(usize length) {
             return (Ref<T>)AllocateBytes(sizeof(T) * length, alignof(T));
         }
-        void dealloc(Ref<T> ref, size_t length_) {
+        void dealloc(Ref<T> ref, usize length_) {
             DeallocateBytes((Ref<ubyte>)ref);
         }
 

@@ -38,7 +38,7 @@ namespace Nrl {
         }
 
         template<typename... Args>
-        [[nodiscard]] static DynamicArray Fill(size_t length, const Args&... args) {
+        [[nodiscard]] static DynamicArray Fill(usize length, const Args&... args) {
             DynamicArray a;
 
             while (a.m_Length != length)
@@ -48,7 +48,7 @@ namespace Nrl {
         }
 
         template<typename F, typename... Args>
-        [[nodiscard]] static DynamicArray FillWith(size_t length, F&& factory, const Args&... args) {
+        [[nodiscard]] static DynamicArray FillWith(usize length, F&& factory, const Args&... args) {
             DynamicArray a;
 
             while (a.m_Length != length)
@@ -58,7 +58,7 @@ namespace Nrl {
         }
 
         template<typename Args>
-        [[nodiscard]] static DynamicArray FillFrom(size_t length, Args&& args) {
+        [[nodiscard]] static DynamicArray FillFrom(usize length, Args&& args) {
             DynamicArray a;
 
             while (a.m_Length != length)
@@ -110,21 +110,21 @@ namespace Nrl {
         }
 
         template<typename... Args>
-        size_t emplace(Args&&... args) {
+        usize emplace(Args&&... args) {
             _grow_if();
             m_Allocator.construct(m_Data + m_Length, Forward<Args>(args)...);
             return m_Length++;
         }
 
         template<typename F, typename... Args>
-        size_t emplace_with(F&& factory, Args&&... args) {
+        usize emplace_with(F&& factory, Args&&... args) {
             _grow_if();
             m_Allocator.construct_with(m_Data + m_Length, Forward<F>(factory), Forward<Args>(args)...);
             return m_Length++;
         }
 
         template<c_HasMake Args>
-        size_t emplace_from(Args&& args) {
+        usize emplace_from(Args&& args) {
             _grow_if();
             m_Allocator.construct_from(m_Data + m_Length, Forward<Args>(args));
             return m_Length++;
@@ -138,13 +138,13 @@ namespace Nrl {
                 pop();
         }
 
-        void reserve(size_t new_capacity) {
+        void reserve(usize new_capacity) {
             NRL_ASSERT(n > m_Length, "Could not reserve memory for DynamicArray: new capacity is less than current length!");
             if (new_capacity == m_Capacity)
                 return;
 
             Ref<T> new_data = m_Allocator.alloc(new_capacity);
-            for (size_t i = 0; i < m_Length; i++)
+            for (usize i = 0; i < m_Length; i++)
                 m_Allocator.construct(new_data + i, Move(*_ptr_at(i)));
 
             m_Allocator.dealloc(m_Data, m_Capacity);
@@ -152,11 +152,11 @@ namespace Nrl {
             m_Data = new_data;
         }
 
-        void grow(size_t n) {
+        void grow(usize n) {
             reserve(m_Capacity + n);
         }
         void grow_by(float r) {
-            reserve((size_t)(m_Capacity * r + 0.5f));
+            reserve((usize)(m_Capacity * r + 0.5f));
         }
 
         void dispose(void) {
@@ -165,11 +165,11 @@ namespace Nrl {
             m_Capacity = 0;
         }
 
-        [[nodiscard]] constexpr Iterator at(size_t i) { return ref() + i; }
-        [[nodiscard]] constexpr ConstIterator at(size_t i) const { return ref() + i; }
+        [[nodiscard]] constexpr Iterator at(usize i) { return ref() + i; }
+        [[nodiscard]] constexpr ConstIterator at(usize i) const { return ref() + i; }
 
-        [[nodiscard]] constexpr ReverseIterator rat(size_t i) { return at(m_Length).reverse() + 1 + i; }
-        [[nodiscard]] constexpr ConstReverseIterator rat(size_t i) const { return at(m_Length).reverse() + 1 + i; }
+        [[nodiscard]] constexpr ReverseIterator rat(usize i) { return at(m_Length).reverse() + 1 + i; }
+        [[nodiscard]] constexpr ConstReverseIterator rat(usize i) const { return at(m_Length).reverse() + 1 + i; }
 
         [[nodiscard]] constexpr Iterator begin(void) { return at(0); }
         [[nodiscard]] constexpr Iterator end(void) { return at(m_Length); }
@@ -183,20 +183,20 @@ namespace Nrl {
         [[nodiscard]] constexpr ConstReverseIterator rbegin(void) const { return rat(0); }
         [[nodiscard]] constexpr ConstReverseIterator rend(void) const { return rat(m_Length); }
 
-        [[nodiscard]] constexpr T& operator[](size_t i) { return *(ref() + i); }
-        [[nodiscard]] constexpr const T& operator[](size_t i) const { return *(ref() + i); }
+        [[nodiscard]] constexpr T& operator[](usize i) { return *(ref() + i); }
+        [[nodiscard]] constexpr const T& operator[](usize i) const { return *(ref() + i); }
 
         [[nodiscard]] constexpr Ref<T> ref(void) { return m_Data; }
         [[nodiscard]] constexpr Ref<const T> ref(void) const { return m_Data; }
 
-        [[nodiscard]] constexpr size_t length(void) const { return m_Length; }
-        [[nodiscard]] constexpr size_t capacity(void) const { return m_Capacity; }
+        [[nodiscard]] constexpr usize length(void) const { return m_Length; }
+        [[nodiscard]] constexpr usize capacity(void) const { return m_Capacity; }
 
-        [[nodiscard]] constexpr size_t size(void) const { return m_Length * sizeof(T); }
-        [[nodiscard]] constexpr size_t max_size(void) const { return m_Capacity * sizeof(T); }
+        [[nodiscard]] constexpr usize size(void) const { return m_Length * sizeof(T); }
+        [[nodiscard]] constexpr usize max_size(void) const { return m_Capacity * sizeof(T); }
     private:
-        [[nodiscard]] constexpr T* _ptr_at(size_t i) { return (ref() + i).ptr(); }
-        [[nodiscard]] constexpr const T* _ptr_at(size_t i) const { return (ref() + i).ptr(); }
+        [[nodiscard]] constexpr T* _ptr_at(usize i) { return (ref() + i).ptr(); }
+        [[nodiscard]] constexpr const T* _ptr_at(usize i) const { return (ref() + i).ptr(); }
 
         void _grow_if(void) {
             if (m_Length == m_Capacity) {
@@ -210,7 +210,7 @@ namespace Nrl {
         DynamicArray(void) = default;
     private:
         Ref<T> m_Data = Ref<T>::_None();
-        size_t m_Length = 0, m_Capacity = 0;
+        usize m_Length = 0, m_Capacity = 0;
         NRL_NO_UNIQUE_ADDRESS Allocator<T> m_Allocator = Allocator<T>::New();
     };
 

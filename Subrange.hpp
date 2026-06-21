@@ -44,12 +44,12 @@ namespace Nrl {
             return Subrange<typename T::Reversed>::New(m_End.reverse() + 1, m_Begin.reverse() + 1);
         }
 
-        [[nodiscard]] constexpr Iterator at(size_t i) const { return m_Begin + i; }
+        [[nodiscard]] constexpr Iterator at(usize i) const { return m_Begin + i; }
         [[nodiscard]] constexpr Iterator begin(void) const { return m_Begin; }
         [[nodiscard]] constexpr Iterator end(void) const { return m_End; }
 
         [[nodiscard]] constexpr iptr distance(void) const { return Distance(m_Begin, m_End); }
-        [[nodiscard]] constexpr size_t length(void) const { return (size_t)Absolute(distance()); }
+        [[nodiscard]] constexpr usize length(void) const { return (usize)Absolute(distance()); }
 
   		template<typename U>
 		    requires IsConvertible_v<T, U>
