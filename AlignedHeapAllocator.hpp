@@ -30,7 +30,7 @@ namespace Nrl {
             new (ref.ptr()) T(Forward<Args>(args).make());
         }
 
-        void destroy(Ref<T> ref) noexcept {
+        void destruct(Ref<T> ref) noexcept {
             ref->~T();
         }
     private:
