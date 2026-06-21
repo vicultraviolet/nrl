@@ -50,15 +50,22 @@ namespace Nrl {
     template<typename T>
     [[nodiscard]] T declval(void) noexcept;
 
-    template<typename From, typename To>
-    struct IsConvertible : FalseType {};
+    template <typename From, typename To>
+    class IsConvertible {
+    private:
+        static void TestHelper(To);
 
-    template<typename From, typename To>
-    requires requires { (To)declval<From>(); }
-    struct IsConvertible<From, To> : TrueType {};
+        template<typename F>
+        [[nodiscard]] static auto Test(int) -> decltype(TestHelper(declval<F>()), TrueType{});
 
-    template<typename From, typename To>
-    constexpr bool IsConvertible_v = IsConvertible<From, To>::value;
+        template<typename F>
+        [[nodiscard]] static auto Test(...) -> FalseType;
+    public:
+        static constexpr bool value = decltype(Test<From>(0))::value;
+    };
+
+    template <typename From, typename To>
+    inline constexpr bool IsConvertible_v = IsConvertible<From, To>::value;
 
     template<bool B, typename T = void>
     struct EnableIf {};

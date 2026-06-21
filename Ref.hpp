@@ -2,6 +2,7 @@
 
 #include "./Utils.hpp"
 #include "./Debug.hpp"
+#include "nrl/Traits.hpp"
 
 namespace Nrl {
     // non owning, non zero reference (unless inside Option)
@@ -62,7 +63,11 @@ namespace Nrl {
 		[[nodiscard]] constexpr Ref operator-(size_t x) const { return m_Ptr - x; }
 
 		template<typename U>
-		[[nodiscard]] explicit operator Ref<U>(void) { return Ref<U>::New(*(U*)m_Ptr); }
+		    requires IsConvertible_v<T*, U*>
+		[[nodiscard]] operator Ref<U>(void) { return Ref<U>::FromPtr((U*)m_Ptr); }
+
+		template<typename U>
+		[[nodiscard]] explicit operator Ref<U>(void) { return Ref<U>::FromPtr((U*)m_Ptr); }
 
         [[nodiscard]] constexpr static Ref _None(void) { return nullptr; }
         [[nodiscard]] constexpr bool _is_some(void) const { return m_Ptr; }
