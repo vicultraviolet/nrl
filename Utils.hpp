@@ -42,4 +42,12 @@ namespace Nrl {
 
     template<typename T>
     [[nodiscard]] T New(T&& t) { return Forward<T>(t); }
+
+    template<typename T>
+    [[nodiscard]] constexpr T Absolute(T x) {
+        if (x > 0)
+            return x;
+        else
+            return -x;
+    }
 } // namespace Nrl
