@@ -66,10 +66,10 @@ namespace Nrl {
 
 		template<typename U>
 		    requires IsConvertible_v<T*, U*>
-		[[nodiscard]] operator Ref<U>(void) { return Ref<U>::FromPtr((U*)m_Ptr); }
+		[[nodiscard]] operator Ref<U>(void) const { return Ref<U>::FromPtr((U*)m_Ptr); }
 
 		template<typename U>
-		[[nodiscard]] explicit operator Ref<U>(void) { return Ref<U>::FromPtr((U*)m_Ptr); }
+		[[nodiscard]] explicit operator Ref<U>(void) const { return Ref<U>::FromPtr((U*)m_Ptr); }
 
         [[nodiscard]] constexpr static Ref _None(void) { return nullptr; }
         [[nodiscard]] constexpr bool _is_some(void) const { return m_Ptr; }
