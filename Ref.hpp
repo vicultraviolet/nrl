@@ -62,6 +62,8 @@ namespace Nrl {
 		[[nodiscard]] constexpr Ref operator+(size_t x) const { return m_Ptr + x; }
 		[[nodiscard]] constexpr Ref operator-(size_t x) const { return m_Ptr - x; }
 
+		[[nodiscard]] constexpr iptr operator-(Ref other) const { return m_Ptr - other.m_Ptr; }
+
 		template<typename U>
 		    requires IsConvertible_v<T*, U*>
 		[[nodiscard]] operator Ref<U>(void) { return Ref<U>::FromPtr((U*)m_Ptr); }

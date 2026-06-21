@@ -40,7 +40,10 @@ namespace Nrl {
         using ubyte = unsigned char;
 
         using uptr = uintptr_t;
-        constexpr size_t k_PtrSize = sizeof(size_t);
+        using iptr = ptrdiff_t;
+
+        constexpr size_t k_PtrSize = sizeof(void*);
+        
         using nullptr_t = decltype(nullptr);
     } // namespace Primitives
     using namespace Primitives;
