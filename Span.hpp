@@ -64,7 +64,7 @@ namespace Nrl {
         [[nodiscard]] constexpr Iterator begin(void) const { return at(0); }
         [[nodiscard]] constexpr Iterator end(void) const { return at(m_Length); }
 
-        [[nodiscard]] constexpr ReverseIterator rat(size_t i) const { return at(m_Length - 1).reverse() + i; }
+        [[nodiscard]] constexpr ReverseIterator rat(size_t i) const { return at(m_Length).reverse() + 1 + i; }
         [[nodiscard]] constexpr ReverseIterator rbegin(void) const { return rat(0); }
         [[nodiscard]] constexpr ReverseIterator rend(void) const { return rat(m_Length); }
 

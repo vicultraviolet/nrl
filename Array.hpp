@@ -110,8 +110,8 @@ namespace Nrl {
         [[nodiscard]] constexpr Iterator at(size_t i) { return ref() + i; }
         [[nodiscard]] constexpr ConstIterator at(size_t i) const { return ref() + i; }
 
-        [[nodiscard]] constexpr ReverseIterator rat(size_t i) { return at(L - 1).reverse() + i; }
-        [[nodiscard]] constexpr ConstReverseIterator rat(size_t i) const { return at(L - 1).reverse() + i; }
+        [[nodiscard]] constexpr ReverseIterator rat(size_t i) { return at(L).reverse() + 1 + i; }
+        [[nodiscard]] constexpr ConstReverseIterator rat(size_t i) const { return at(L).reverse() + 1 + i; }
 
         [[nodiscard]] constexpr Iterator begin(void) { return at(0); }
         [[nodiscard]] constexpr Iterator end(void) { return at(L); }
