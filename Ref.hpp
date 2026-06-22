@@ -43,12 +43,12 @@ namespace Nrl {
 		[[nodiscard]] constexpr T& operator*(void) const { return *m_Ptr; }
 		[[nodiscard]] constexpr T* operator->(void) const { return m_Ptr; }
 
-		[[nodiscard]] constexpr bool operator==(const Ref& other) const { return m_Ptr == other.m_Ptr; }
-		[[nodiscard]] constexpr bool operator!=(const Ref& other) const { return m_Ptr != other.m_Ptr; }
-		[[nodiscard]] constexpr bool operator> (const Ref& other) const { return m_Ptr >  other.m_Ptr; }
-		[[nodiscard]] constexpr bool operator< (const Ref& other) const { return m_Ptr <  other.m_Ptr; }
-		[[nodiscard]] constexpr bool operator>=(const Ref& other) const { return m_Ptr >= other.m_Ptr; }
-		[[nodiscard]] constexpr bool operator<=(const Ref& other) const { return m_Ptr <= other.m_Ptr; }
+		[[nodiscard]] constexpr bool operator==(Ref other) const { return m_Ptr == other.m_Ptr; }
+		[[nodiscard]] constexpr bool operator!=(Ref other) const { return m_Ptr != other.m_Ptr; }
+		[[nodiscard]] constexpr bool operator> (Ref other) const { return m_Ptr >  other.m_Ptr; }
+		[[nodiscard]] constexpr bool operator< (Ref other) const { return m_Ptr <  other.m_Ptr; }
+		[[nodiscard]] constexpr bool operator>=(Ref other) const { return m_Ptr >= other.m_Ptr; }
+		[[nodiscard]] constexpr bool operator<=(Ref other) const { return m_Ptr <= other.m_Ptr; }
 
 		constexpr Ref& operator++(void) { m_Ptr++; return *this; }
 		constexpr Ref  operator++(int) { m_Ptr++; return m_Ptr - 1; }
