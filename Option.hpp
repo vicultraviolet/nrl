@@ -74,9 +74,32 @@ namespace Nrl {
         NonIntrusiveOption(None_t none) : NonIntrusiveOption(k_InPlace, T::_None) {}
         NonIntrusiveOption& operator=(None_t none) { destroy(); return *this; }
 
-        T unwrap(void) {
+        [[nodiscard]] T unwrap(void) {
             NRL_ASSERT(is_some(), "Could not unwrap Option: No value!");
             return Move(m_Data);
+        }
+
+        [[nodiscard]] T unwrap_or(T x) {
+            if (is_some())
+                return Move(m_Data);
+            else
+                return x;
+        }
+
+        template<typename F, typename... Args>
+        [[nodiscard]] T unwrap_or_with(F&& factory, Args&&... args) {
+            if (is_some())
+                return Move(m_Data);
+            else
+                return factory(Forward<Args>(args)...);
+        }
+
+        template<typename Args>
+        [[nodiscard]] T unwrap_or_from(Args&& args) {
+            if (is_some())
+                return Move(m_Data);
+            else
+                return Forward<Args>(args).make();
         }
 
         void destroy(void) {
@@ -212,6 +235,32 @@ namespace Nrl {
 
         [[nodiscard]] T unwrap(void) {
             NRL_ASSERT(m_IsSome, "Could not unwrap Option: No value!");
+            m_IsSome = false;
+            return Move(*_ptr());
+        }
+
+        [[nodiscard]] T unwrap_or(T x) {
+            if (is_none())
+                return x;
+
+            m_IsSome = false;
+            return Move(*_ptr());
+        }
+
+        template<typename F, typename... Args>
+        [[nodiscard]] T unwrap_or_with(F&& factory, Args&&... args) {
+            if (is_none())
+                return factory(Forward<Args>(args)...);
+
+            m_IsSome = false;
+            return Move(*_ptr());
+        }
+
+        template<typename Args>
+        [[nodiscard]] T unwrap_or_from(Args&& args) {
+            if (is_none())
+                return Forward<Args>(args).make();
+
             m_IsSome = false;
             return Move(*_ptr());
         }
