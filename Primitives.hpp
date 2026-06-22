@@ -51,6 +51,7 @@ namespace Nrl {
         constexpr iptr iptrmax = PTRDIFF_MAX;
 
         using utf8char = char8_t;
+        using utf8rune = char32_t;
 
         constexpr usize ptrsize = sizeof(void*);
 

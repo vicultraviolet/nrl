@@ -64,8 +64,11 @@ namespace Nrl {
         static constexpr bool value = decltype(Test<From>(0))::value;
     };
 
-    template <typename From, typename To>
+    template<typename From, typename To>
     inline constexpr bool IsConvertible_v = IsConvertible<From, To>::value;
+
+    template<typename From, typename To>
+    concept c_IsConvertible = IsConvertible_v<From, To>;
 
     template<bool B, typename T = void>
     struct EnableIf {};
@@ -147,8 +150,8 @@ namespace Nrl {
     template<typename T>
     concept c_Readable = requires(T t) {
         typename T::ValueType;
-        { *t } -> c_SameAs<typename T::ValueType&>;
-        { t.operator->() } -> c_SameAs<typename T::ValueType*>;
+        { *t } -> c_IsConvertible<typename T::ValueType>;
+        //{ t.operator->() } -> c_SameAs<typename T::ValueType*>;
     };
 
     template<typename T>
@@ -176,4 +179,10 @@ namespace Nrl {
         { a <= b } -> c_SameAs<bool>;
         { a >= b } -> c_SameAs<bool>;
     };
+
+    template<typename T>
+    concept c_Char =
+        SameAs_v<RemoveConst_t<T>, char> ||
+        SameAs_v<RemoveConst_t<T>, ubyte> ||
+        SameAs_v<RemoveConst_t<T>, utf8char>;
 } // namespace Nrl
