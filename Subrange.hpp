@@ -40,7 +40,7 @@ namespace Nrl {
             return Subrange(c.begin(), c.end());
         }
 
-        [[nodiscard]] constexpr Subrange<typename T::Reversed> reverse(void) const {
+        [[nodiscard]] constexpr auto reverse(void) const requires c_BidirectionalIterator<T> {
             return Subrange<typename T::Reversed>::New(m_End.reverse() + 1, m_Begin.reverse() + 1);
         }
 
