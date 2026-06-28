@@ -49,8 +49,8 @@ namespace Nrl {
             return *this;
         }
 
-        Span(Span&& other) : m_Ref(Move(other.m_Ref)), m_Length(Exchange(other.m_Length, 0)) {}
-        Span& operator=(Span&& other) {
+        Span(Span&& other) noexcept : m_Ref(Move(other.m_Ref)), m_Length(Exchange(other.m_Length, 0)) {}
+        Span& operator=(Span&& other) noexcept {
             if (this == &other)
                 return *this;
 
@@ -58,6 +58,10 @@ namespace Nrl {
             m_Length = Exchange(other.m_Length, 0);
 
             return *this;
+        }
+
+        [[nodiscard]] constexpr Span<T> sub(iptr begin, iptr end) {
+            return New(m_Ref + begin, m_Length - begin - end);
         }
 
         [[nodiscard]] constexpr Iterator at(usize i) const { return ref() + i; }
@@ -75,10 +79,10 @@ namespace Nrl {
 
   		template<typename U>
 		    requires IsConvertible_v<T*, U*>
-		[[nodiscard]] operator Span<U>(void) { return Span<U>::New(m_Ref, m_Length); }
+		[[nodiscard]] operator Span<U>(void) const { return Span<U>::New(m_Ref, m_Length); }
 
 		template<typename U>
-		[[nodiscard]] explicit operator Span<U>(void) { return Span<U>::New((Ref<U>)m_Ref, m_Length); }
+		[[nodiscard]] explicit operator Span<U>(void) const { return Span<U>::New((Ref<U>)m_Ref, m_Length); }
 
         [[nodiscard]] static Span _None(void) { return Span(); }
         [[nodiscard]] constexpr bool _is_some(void) const { return m_Ref._is_some() && m_Length != 0; }

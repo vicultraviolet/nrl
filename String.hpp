@@ -10,6 +10,15 @@ namespace Nrl {
         return NewSpan(ref, Utf8::GetStringSize(ref));
     }
 
+    template<typename T>
+    [[nodiscard]] constexpr Option<typename T::Iterator> FindCharInSpan(T chars, typename T::ValueType c) {
+        for (auto it = chars.begin(); it != chars.end(); it++) {
+            if (*it == c)
+                return Some(it);
+        }
+        return None();
+    }
+
     enum class StringState : u8 {
         None = 0, Long, Short
     };
@@ -78,14 +87,78 @@ namespace Nrl {
         }
 
         template<c_Char T>
-        void set(Span<const T> chars) {
+        [[nodiscard]] String operator+(Span<const T> chars) const { return cat(chars); }
+
+        template<c_Char T>
+        [[nodiscard]] String operator+(T c) const { return cat(c); }
+
+        [[nodiscard]] String operator+(const String& other) const { return cat(other.chars()); }
+
+        template<c_Char T>
+        String& operator+=(Span<const T> chars) { append(chars); return *this; }
+
+        template<c_Char T>
+        String& operator+=(T c) { push(c); return *this; }
+
+        String& operator+=(const String& other) { append(other.chars()); return *this; }
+
+        template<c_Char T>
+        [[nodiscard]] String cat(Span<const T> chars) const {
+            String str;
+            str.reserve(max_size() + chars.length());
+            str.set_data(this->chars());
+            str.set_data(chars, size());
+            return str;
+        }
+
+        template<c_Char T>
+        [[nodiscard]] String cat(T c) const {
+            String str;
+            str.reserve(max_size() + 4);
+            str.set_data(this->chars());
+            *(str.ref() + str.size()) = c;
+            str.set_size(size() + 1);
+        }
+
+        template<c_Char T>
+        void append(Span<const T> chars) {
+            grow(chars.length());
+            set_data(chars, size());
+        }
+
+        template<c_Char T>
+        void push(T c) {
+            reserve(max_size() + 4);
+            *(ref() + size()) = c;
+            set_size(size() + 1);
+        }
+
+        template<c_Char T>
+        void set_data(Span<const T> chars, usize offset = 0) {
+            memcpy(ref().ptr() + offset, chars.ref().ptr(), chars.length());
+            set_size(chars.length() + offset);
+        }
+
+        template<c_Char T>
+        void set(Span<const T> chars, usize offset = 0) {
             reserve(chars.length());
-            memcpy(ref().ptr(), chars.ref().ptr(), chars.length());
-            _set_size(chars.length());
+            set_data(chars, offset);
         }
 
         void clear(void) {
-            _set_size(0);
+            set_size(0);
+        }
+
+        void set_size(usize new_size) {
+            switch (m_State) {
+                case StringState::Long:
+                    m_Long.size = new_size;
+                    break;
+                case StringState::Short:
+                    m_Short.size = new_size;
+                    break;
+                default:
+            }
         }
 
         void reserve(usize new_max_size) {
@@ -204,17 +277,6 @@ namespace Nrl {
         [[nodiscard]] constexpr StringState state(void) const { return m_State; }
     private:
         void _empty(void) { memset((void*)this, 0, sizeof(String)); }
-        void _set_size(usize new_size) {
-            switch (m_State) {
-                case StringState::Long:
-                    m_Long.size = new_size;
-                    break;
-                case StringState::Short:
-                    m_Short.size = new_size;
-                    break;
-                default:
-            }
-        }
 
         String(void) { _empty(); }
     private:
