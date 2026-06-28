@@ -1,24 +1,9 @@
 #pragma once
 
-#include "./Utf8.hpp"
+#include "./Chars.hpp"
 #include "./AlignedHeapAllocator.hpp"
 
 namespace Nrl {
-    template<c_Char T>
-    [[nodiscard]] constexpr Span<T> CharSpanOf(T* chars) {
-        Ref<T> ref = RefFromPtr(chars);
-        return NewSpan(ref, Utf8::GetStringSize(ref));
-    }
-
-    template<typename T>
-    [[nodiscard]] constexpr Option<typename T::Iterator> FindCharInSpan(T chars, typename T::ValueType c) {
-        for (auto it = chars.begin(); it != chars.end(); it++) {
-            if (*it == c)
-                return Some(it);
-        }
-        return None();
-    }
-
     enum class StringState : u8 {
         None = 0, Long, Short
     };
@@ -42,7 +27,7 @@ namespace Nrl {
         template<c_Char T>
         [[nodiscard]] static String Of(const T* chars) {
             String str;
-            str.set(CharSpanOf(chars));
+            str.set(Chars::Of(chars));
             return str;
         }
 

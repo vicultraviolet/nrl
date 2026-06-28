@@ -15,7 +15,7 @@ namespace Nrl {
 
         template<c_Char T>
         [[nodiscard]] constexpr static StringView Of(const T* chars) {
-            return New(CharSpanOf(chars));
+            return New(Chars::Of(chars));
         }
 
         [[nodiscard]] constexpr static StringView Of(const String& s) {
