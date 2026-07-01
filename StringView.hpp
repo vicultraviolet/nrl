@@ -45,5 +45,13 @@ namespace Nrl {
         Span<const utf8char> m_Chars;
     };
 
+    [[nodiscard]] constexpr StringView operator""sv(const char* chars, usize size) {
+        return StringView::New(NewSpan(RefFromPtr(chars), size));
+    }
+
+    [[nodiscard]] constexpr StringView operator""sv(const utf8char* chars, usize size) {
+        return StringView::New(NewSpan(RefFromPtr(chars), size));
+    }
+
     [[nodiscard]] constexpr String StringFrom(StringView view) { return String::New(view.chars()); }
 } // namespace Nrl

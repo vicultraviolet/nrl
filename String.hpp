@@ -4,6 +4,9 @@
 #include "./AlignedHeapAllocator.hpp"
 
 namespace Nrl {
+    template<typename T>
+    class Debug;
+
     enum class StringState : u8 {
         None = 0, Long, Short
     };
@@ -16,6 +19,11 @@ namespace Nrl {
         using ConstIterator = Utf8::Iterator;
     public:
         [[nodiscard]] constexpr static String Empty(void) { return String(); }
+        [[nodiscard]] constexpr static String Reserve(usize capacity) {
+            String str;
+            str.reserve(capacity);
+            return str;
+        }
 
         template<c_Char T>
         [[nodiscard]] static String New(Span<T> chars) {
@@ -72,7 +80,7 @@ namespace Nrl {
         }
 
         template<c_Char T>
-        [[nodiscard]] String operator+(Span<const T> chars) const { return cat(chars); }
+        [[nodiscard]] String operator+(Span<T> chars) const { return cat(chars); }
 
         template<c_Char T>
         [[nodiscard]] String operator+(T c) const { return cat(c); }
@@ -80,7 +88,7 @@ namespace Nrl {
         [[nodiscard]] String operator+(const String& other) const { return cat(other.chars()); }
 
         template<c_Char T>
-        String& operator+=(Span<const T> chars) { append(chars); return *this; }
+        String& operator+=(Span<T> chars) { append(chars); return *this; }
 
         template<c_Char T>
         String& operator+=(T c) { push(c); return *this; }
@@ -88,7 +96,7 @@ namespace Nrl {
         String& operator+=(const String& other) { append(other.chars()); return *this; }
 
         template<c_Char T>
-        [[nodiscard]] String cat(Span<const T> chars) const {
+        [[nodiscard]] String cat(Span<T> chars) const {
             String str;
             str.reserve(max_size() + chars.length());
             str.set_data(this->chars());
@@ -106,7 +114,7 @@ namespace Nrl {
         }
 
         template<c_Char T>
-        void append(Span<const T> chars) {
+        void append(Span<T> chars) {
             grow(chars.length());
             set_data(chars, size());
         }
@@ -119,13 +127,13 @@ namespace Nrl {
         }
 
         template<c_Char T>
-        void set_data(Span<const T> chars, usize offset = 0) {
+        void set_data(Span<T> chars, usize offset = 0) {
             memcpy(ref().ptr() + offset, chars.ref().ptr(), chars.length());
             set_size(chars.length() + offset);
         }
 
         template<c_Char T>
-        void set(Span<const T> chars, usize offset = 0) {
+        void set(Span<T> chars, usize offset = 0) {
             reserve(chars.length());
             set_data(chars, offset);
         }
@@ -261,6 +269,8 @@ namespace Nrl {
 
         [[nodiscard]] constexpr StringState state(void) const { return m_State; }
     private:
+        friend class Debug<String>;
+
         void _empty(void) { memset((void*)this, 0, sizeof(String)); }
 
         String(void) { _empty(); }
@@ -282,4 +292,12 @@ namespace Nrl {
         };
         NRL_NO_UNIQUE_ADDRESS Allocator<utf8char> m_Allocator = Allocator<utf8char>::New();
     };
+
+    [[nodiscard]] constexpr String operator""s(const char* chars, usize size) {
+        return String::New(NewSpan(RefFromPtr(chars), size));
+    }
+
+    [[nodiscard]] constexpr String operator""s(const utf8char* chars, usize size) {
+        return String::New(NewSpan(RefFromPtr(chars), size));
+    }
 } // namespace Nrl
