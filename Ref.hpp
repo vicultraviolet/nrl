@@ -1,13 +1,17 @@
 #pragma once
 
+#include <string.h>
+
 #include "./Utils.hpp"
 #include "./Debug.hpp"
-#include "nrl/Traits.hpp"
+#include "./Traits.hpp"
 
 namespace Nrl {
     // non owning, non zero reference (unless inside Option)
     template<typename T>
     class Ref {
+    public:
+        using ValueType = T;
     public:
         [[nodiscard]] static Ref New(T& referenced) {
             return &referenced;
@@ -79,9 +83,125 @@ namespace Nrl {
         T* m_Ptr;
     };
 
+    template<>
+    class Ref<void> {
+    public:
+        using ValueType = void;
+    public:
+        [[nodiscard]] static Ref FromPtr(void* ptr) {
+            NRL_ASSERT(ptr, "Failed to create Ref: ptr is null!");
+            return ptr;
+        }
+
+        ~Ref(void) { m_Ptr = nullptr; }
+
+        Ref(const Ref& other) : m_Ptr(other.m_Ptr) {}
+        Ref& operator=(const Ref& other) {
+            if (this == &other)
+                return *this;
+
+            m_Ptr = other.m_Ptr;
+
+            return *this;
+        }
+
+        Ref(Ref&& other) noexcept : m_Ptr(Exchange(other.m_Ptr, nullptr)) {}
+        Ref& operator=(Ref&& other) noexcept {
+            if (this == &other)
+                return *this;
+
+            m_Ptr = Exchange(other.m_Ptr, nullptr);
+
+            return *this;
+        }
+
+        [[nodiscard]] constexpr void* ptr(void) const { return m_Ptr; }
+
+		[[nodiscard]] constexpr bool operator==(Ref other) const { return m_Ptr == other.m_Ptr; }
+		[[nodiscard]] constexpr bool operator!=(Ref other) const { return m_Ptr != other.m_Ptr; }
+		[[nodiscard]] constexpr bool operator> (Ref other) const { return m_Ptr >  other.m_Ptr; }
+		[[nodiscard]] constexpr bool operator< (Ref other) const { return m_Ptr <  other.m_Ptr; }
+		[[nodiscard]] constexpr bool operator>=(Ref other) const { return m_Ptr >= other.m_Ptr; }
+		[[nodiscard]] constexpr bool operator<=(Ref other) const { return m_Ptr <= other.m_Ptr; }
+
+		template<typename U>
+		    requires IsConvertible_v<void*, U*>
+		[[nodiscard]] operator Ref<U>(void) const { return Ref<U>::FromPtr((U*)m_Ptr); }
+
+		template<typename U>
+		[[nodiscard]] explicit operator Ref<U>(void) const { return Ref<U>::FromPtr((U*)m_Ptr); }
+
+        [[nodiscard]] constexpr static Ref _None(void) { return nullptr; }
+        [[nodiscard]] constexpr bool _is_some(void) const { return m_Ptr; }
+    private:
+        Ref(void* ptr) : m_Ptr(ptr) {}
+    private:
+        void* m_Ptr;
+    };
+
+    template<>
+    class Ref<const void> {
+    public:
+        using ValueType = const void;
+    public:
+        [[nodiscard]] static Ref FromPtr(const void* ptr) {
+            NRL_ASSERT(ptr, "Failed to create Ref: ptr is null!");
+            return ptr;
+        }
+
+        ~Ref(void) { m_Ptr = nullptr; }
+
+        Ref(const Ref& other) : m_Ptr(other.m_Ptr) {}
+        Ref& operator=(const Ref& other) {
+            if (this == &other)
+                return *this;
+
+            m_Ptr = other.m_Ptr;
+
+            return *this;
+        }
+
+        Ref(Ref&& other) noexcept : m_Ptr(Exchange(other.m_Ptr, nullptr)) {}
+        Ref& operator=(Ref&& other) noexcept {
+            if (this == &other)
+                return *this;
+
+            m_Ptr = Exchange(other.m_Ptr, nullptr);
+
+            return *this;
+        }
+
+        [[nodiscard]] constexpr const void* ptr(void) const { return m_Ptr; }
+
+		[[nodiscard]] constexpr bool operator==(Ref other) const { return m_Ptr == other.m_Ptr; }
+		[[nodiscard]] constexpr bool operator!=(Ref other) const { return m_Ptr != other.m_Ptr; }
+		[[nodiscard]] constexpr bool operator> (Ref other) const { return m_Ptr >  other.m_Ptr; }
+		[[nodiscard]] constexpr bool operator< (Ref other) const { return m_Ptr <  other.m_Ptr; }
+		[[nodiscard]] constexpr bool operator>=(Ref other) const { return m_Ptr >= other.m_Ptr; }
+		[[nodiscard]] constexpr bool operator<=(Ref other) const { return m_Ptr <= other.m_Ptr; }
+
+		template<typename U>
+		    requires IsConvertible_v<const void*, U*>
+		[[nodiscard]] operator Ref<U>(void) const { return Ref<U>::FromPtr((U*)m_Ptr); }
+
+		template<typename U>
+		[[nodiscard]] explicit operator Ref<U>(void) const { return Ref<U>::FromPtr((U*)m_Ptr); }
+
+        [[nodiscard]] constexpr static Ref _None(void) { return nullptr; }
+        [[nodiscard]] constexpr bool _is_some(void) const { return m_Ptr; }
+    private:
+        Ref(const void* ptr) : m_Ptr(ptr) {}
+    private:
+        const void* m_Ptr;
+    };
+
     template<typename T>
     [[nodiscard]] Ref<T> NewRef(T& referenced) { return Ref<T>::New(referenced); }
 
     template<typename T>
     [[nodiscard]] Ref<T> RefFromPtr(T* ptr) { return Ref<T>::FromPtr(ptr); }
+
+    void RefCopy(Ref<void> destination, Ref<const void> source, usize size) {
+        memcpy(destination.ptr(), source.ptr(), size);
+    }
 } // namespace Nrl
