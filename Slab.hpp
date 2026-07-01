@@ -1,22 +1,24 @@
 #pragma once
 
-#include "./Primitives.hpp"
 #include "./Ref.hpp"
 #include "./ArrayIterator.hpp"
+#include "./Subrange.hpp"
 
 namespace Nrl {
     template<typename T, usize L>
-    class Array {
+    class Slab {
     public:
         using ValueType = T;
-        using Iterator = ArrayIterator<Array>;
-        using ConstIterator = ArrayConstIterator<Array>;
-        using ReverseIterator = ArrayReverseIterator<Array>;
-        using ConstReverseIterator = ArrayConstReverseIterator<Array>;
+        using Iterator = ArrayIterator<Slab>;
+        using ConstIterator = ArrayConstIterator<Slab>;
+        using ReverseIterator = ArrayReverseIterator<Slab>;
+        using ConstReverseIterator = ArrayConstReverseIterator<Slab>;
     public:
         template<typename... Args>
-        [[nodiscard]] static Array New(Args&&... args) {
-            Array a;
+        [[nodiscard]] static Slab New(Args&&... args) {
+            static_assert(sizeof...(Args) == L, "Failed to create Slab: Argument count mismatch!");
+
+            Slab a;
 
             usize i = 0;
             ((void)[&](void) {
@@ -28,8 +30,10 @@ namespace Nrl {
         }
 
         template<c_HasMake... Args>
-        [[nodiscard]] static Array NewFrom(Args&&... args) {
-            Array a;
+        [[nodiscard]] static Slab NewFrom(Args&&... args) {
+            static_assert(sizeof...(Args) == L, "Failed to create Slab: Argument count mismatch!");
+
+            Slab a;
 
             usize i = 0;
             ((void)[&](void) {
@@ -40,9 +44,32 @@ namespace Nrl {
             return a;
         }
 
+        template<c_InputIterator It>
+        [[nodiscard]] static Slab Copy(Subrange<It> range) {
+            NRL_ASSERT(range.length() == L, "Failed to create Slab: range size mismatch!");
+
+            Slab a;
+
+            for (usize i = 0; const T& x : range)
+                new (a._ptr_at(i++)) T(x);
+
+            return a;
+        }
+        template<c_InputIterator It>
+        [[nodiscard]] static Slab Move(Subrange<It> range) {
+            NRL_ASSERT(range.length() == L, "Failed to create Slab: range size mismatch!");
+
+            Slab a;
+
+            for (usize i = 0; const T& x : range)
+                new (a._ptr_at(i++)) T(Nrl::Move(x));
+
+            return a;
+        }
+
         template<typename... Args>
-        [[nodiscard]] static Array Fill(const Args&... args) {
-            Array a;
+        [[nodiscard]] static Slab Fill(const Args&... args) {
+            Slab a;
 
             for (auto it = a.begin(); it != a.end(); it++)
                 new (it.ptr()) T(args...);
@@ -51,8 +78,8 @@ namespace Nrl {
         }
 
         template<typename F, typename... Args>
-        [[nodiscard]] static Array FillWith(F&& factory, const Args&... args) {
-            Array a;
+        [[nodiscard]] static Slab FillWith(F&& factory, const Args&... args) {
+            Slab a;
 
             for (auto it = a.begin(); it != a.end(); it++)
                 new (it.ptr()) T(factory(args...));
@@ -61,8 +88,8 @@ namespace Nrl {
         }
 
         template<typename Args>
-        [[nodiscard]] static Array FillFrom(Args&& args) {
-            Array a;
+        [[nodiscard]] static Slab FillFrom(Args&& args) {
+            Slab a;
 
             for (auto it = a.begin(); it != a.end(); it++)
                 new (it.ptr()) T(args.make());
@@ -70,17 +97,17 @@ namespace Nrl {
             return a;
         }
 
-        ~Array(void) {
+        ~Slab(void) {
             for (auto it = rbegin(); it != rend(); it++)
                 it->~T();
         }
 
-        Array(const Array& other) {
+        Slab(const Slab& other) {
             usize i = 0;
             for (auto it = begin(); it != end(); it++)
                 new (it.ptr()) T(other[i++]);
         }
-        Array& operator=(const Array& other) {
+        Slab& operator=(const Slab& other) {
             if (this == &other)
                 return *this;
 
@@ -91,18 +118,18 @@ namespace Nrl {
             return *this;
         }
 
-        Array(Array&& other) noexcept {
+        Slab(Slab&& other) noexcept {
             usize i = 0;
             for (auto it = begin(); it != end(); it++)
-                new (it.ptr()) T(Move(other[i++]));
+                new (it.ptr()) T(Nrl::Move(other[i++]));
         }
-        Array& operator=(Array&& other) noexcept {
+        Slab& operator=(Slab&& other) noexcept {
             if (this == &other)
                 return *this;
 
             usize i = 0;
             for (auto it = begin(); it != end(); it++)
-                *it = Move(other[i++]);
+                *it = Nrl::Move(other[i++]);
 
             return *this;
         }
@@ -140,28 +167,33 @@ namespace Nrl {
         [[nodiscard]] constexpr T* _ptr_at(usize i) { return (ref() + i).ptr(); }
         [[nodiscard]] constexpr const T* _ptr_at(usize i) const { return (ref() + i).ptr(); }
 
-        Array(void) = default;
+        Slab(void) = default;
     private:
         alignas(T) ubyte m_Data[L * sizeof(T)];
     };
 
     template<typename T, typename... Args>
-    [[nodiscard]] Array<T, sizeof...(Args)> NewArray(Args&&... args) {
-        return Array<T, sizeof...(Args)>::New(Forward<Args>(args)...);
+    [[nodiscard]] Slab<T, sizeof...(Args)> NewSlab(Args&&... args) {
+        return Slab<T, sizeof...(Args)>::New(Forward<Args>(args)...);
     }
 
     template<c_HasMake First, c_HasMake... Args>
-    [[nodiscard]] auto NewArrayFrom(First&& first, Args&&... args) {
-        return Array<typename First::Type, sizeof...(Args)+1>::NewFrom(Forward<First>(first), Forward<Args>(args)...);
+    [[nodiscard]] auto NewSlabFrom(First&& first, Args&&... args) {
+        return Slab<typename First::Type, sizeof...(Args)+1>::NewFrom(Forward<First>(first), Forward<Args>(args)...);
+    }
+
+    template<typename T, usize L, typename... Args>
+    [[nodiscard]] Slab<T, L> FillSlab(const Args&... args) {
+        return Slab<T, L>::Fill(args...);
     }
 
     template<usize L, typename F, typename... Args>
-    [[nodiscard]] auto FillArrayWith(F&& factory, const Args&... args) {
-        return Array<InvokeResult_t<F, Args...>, L>::Fill(Forward<F>(factory), args...);
+    [[nodiscard]] auto FillSlabWith(F&& factory, const Args&... args) {
+        return Slab<InvokeResult_t<F, Args...>, L>::Fill(Forward<F>(factory), args...);
     }
 
     template<usize L, typename Args>
-    [[nodiscard]] auto FillArrayFrom(Args&& args) {
-        return Array<typename Args::Type, L>::FillFrom(Forward<Args>(args));
+    [[nodiscard]] auto FillSlabFrom(Args&& args) {
+        return Slab<typename Args::Type, L>::FillFrom(Forward<Args>(args));
     }
 } // namespace Nrl

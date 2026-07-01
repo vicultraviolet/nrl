@@ -2,22 +2,29 @@
 
 #include "./AlignedHeapAllocator.hpp"
 #include "./ArrayIterator.hpp"
+#include "./Subrange.hpp"
 
 namespace Nrl {
     template<typename T>
-    class DynamicArray {
+    class Tray {
     public:
         using ValueType = T;
-        using Iterator = ArrayIterator<DynamicArray>;
-        using ConstIterator = ArrayConstIterator<DynamicArray>;
-        using ReverseIterator = ArrayReverseIterator<DynamicArray>;
-        using ConstReverseIterator = ArrayConstReverseIterator<DynamicArray>;
+        using Iterator = ArrayIterator<Tray>;
+        using ConstIterator = ArrayConstIterator<Tray>;
+        using ReverseIterator = ArrayReverseIterator<Tray>;
+        using ConstReverseIterator = ArrayConstReverseIterator<Tray>;
     public:
-        [[nodiscard]] static DynamicArray Empty(void) { return DynamicArray(); }
+        [[nodiscard]] static Tray Empty(void) { return Tray(); }
+
+        [[nodiscard]] static Tray Reserve(usize capacity) {
+            Tray a;
+            a.reserve(capacity);
+            return a;
+        }
 
         template<typename... Args>
-        [[nodiscard]] static DynamicArray New(Args&&... args) {
-            DynamicArray a;
+        [[nodiscard]] static Tray New(Args&&... args) {
+            Tray a = Reserve(sizeof...(Args));
 
             ((void)[&](void) {
                 a.emplace(Forward<Args>(args));
@@ -27,8 +34,8 @@ namespace Nrl {
         }
 
         template<c_HasMake... Args>
-        [[nodiscard]] static DynamicArray NewFrom(Args&&... args) {
-            DynamicArray a;
+        [[nodiscard]] static Tray NewFrom(Args&&... args) {
+            Tray a = Reserve(sizeof...(Args));
 
             ((void)[&](void) {
                 a.emplace_from(Forward<Args>(args));
@@ -37,9 +44,28 @@ namespace Nrl {
             return a;
         }
 
+        template<c_InputIterator It>
+        [[nodiscard]] static Tray Copy(Subrange<It> range) {
+            Tray a = Reserve(range.length());
+
+            for (const T& x : range)
+                a.emplace(x);
+
+            return a;
+        }
+        template<c_InputIterator It>
+        [[nodiscard]] static Tray Move(Subrange<It> range) {
+            Tray a = Reserve(range.length());
+
+            for (const T& x : range)
+                a.emplace(Nrl::Move(x));
+
+            return a;
+        }
+
         template<typename... Args>
-        [[nodiscard]] static DynamicArray Fill(usize length, const Args&... args) {
-            DynamicArray a;
+        [[nodiscard]] static Tray Fill(usize length, const Args&... args) {
+            Tray a = Reserve(length);
 
             while (a.m_Length != length)
                 a.emplace(args...);
@@ -48,8 +74,8 @@ namespace Nrl {
         }
 
         template<typename F, typename... Args>
-        [[nodiscard]] static DynamicArray FillWith(usize length, F&& factory, const Args&... args) {
-            DynamicArray a;
+        [[nodiscard]] static Tray FillWith(usize length, F&& factory, const Args&... args) {
+            Tray a = Reserve(length);
 
             while (a.m_Length != length)
                 a.emplace_with(Forward<F>(factory), args...);
@@ -58,8 +84,8 @@ namespace Nrl {
         }
 
         template<typename Args>
-        [[nodiscard]] static DynamicArray FillFrom(usize length, Args&& args) {
-            DynamicArray a;
+        [[nodiscard]] static Tray FillFrom(usize length, Args&& args) {
+            Tray a = Reserve(length);
 
             while (a.m_Length != length)
                 a.emplace_from(Forward<Args>(args));
@@ -67,14 +93,14 @@ namespace Nrl {
             return a;
         }
 
-        ~DynamicArray(void) { dispose(); }
+        ~Tray(void) { dispose(); }
 
-        DynamicArray(const DynamicArray& other) {
+        Tray(const Tray& other) {
             reserve(other.m_Capacity);
             while (m_Length != other.m_Length)
                 emplace(other[m_Length]);
         }
-        DynamicArray& operator=(const DynamicArray& other) {
+        Tray& operator=(const Tray& other) {
             if (this == &other)
                 return *this;
 
@@ -91,18 +117,18 @@ namespace Nrl {
             return *this;
         }
 
-        DynamicArray(DynamicArray&& other)
-        : m_Data(Move(other.m_Data)),
+        Tray(Tray&& other)
+        : m_Data(Nrl::Move(other.m_Data)),
           m_Length(Exchange(other.m_Length, 0)),
           m_Capacity(Exchange(other.m_Capacity, 0))
         {}
-        DynamicArray& operator=(DynamicArray&& other) {
+        Tray& operator=(Tray&& other) {
             if (this == &other)
                 return *this;
 
             dispose();
 
-            m_Data = Move(other.m_Data);
+            m_Data = Nrl::Move(other.m_Data);
             m_Length = Exchange(other.m_Length, 0);
             m_Capacity = Exchange(other.m_Capacity, 0);
 
@@ -145,7 +171,7 @@ namespace Nrl {
 
             Ref<T> new_data = m_Allocator.alloc(new_capacity);
             for (usize i = 0; i < m_Length; i++)
-                m_Allocator.construct(new_data + i, Move(*_ptr_at(i)));
+                m_Allocator.construct(new_data + i, Nrl::Move(*_ptr_at(i)));
 
             m_Allocator.dealloc(m_Data, m_Capacity);
             m_Capacity = new_capacity;
@@ -189,6 +215,8 @@ namespace Nrl {
         [[nodiscard]] constexpr Ref<T> ref(void) { return m_Data; }
         [[nodiscard]] constexpr Ref<const T> ref(void) const { return m_Data; }
 
+        constexpr void set_length(usize length) { m_Length = length; }
+
         [[nodiscard]] constexpr usize length(void) const { return m_Length; }
         [[nodiscard]] constexpr usize capacity(void) const { return m_Capacity; }
 
@@ -207,7 +235,7 @@ namespace Nrl {
             }
         }
 
-        DynamicArray(void) = default;
+        Tray(void) = default;
     private:
         Ref<T> m_Data = Ref<T>::_None();
         usize m_Length = 0, m_Capacity = 0;
@@ -215,12 +243,12 @@ namespace Nrl {
     };
 
     template<typename T, typename... Args>
-    [[nodiscard]] DynamicArray<T> NewDynamicArray(Args&&... args) {
-        return DynamicArray<T>::New(Forward<Args>(args)...);
+    [[nodiscard]] Tray<T> NewTray(Args&&... args) {
+        return Tray<T>::New(Forward<Args>(args)...);
     }
 
     template<c_HasMake First, c_HasMake... Args>
-    [[nodiscard]] auto NewDynamicArrayFrom(First&& first, Args&&... args) {
-        return DynamicArray<typename First::Type>::NewFrom(Forward<First>(first), Forward<Args>(args)...);
+    [[nodiscard]] auto NewTrayFrom(First&& first, Args&&... args) {
+        return Tray<typename First::Type>::NewFrom(Forward<First>(first), Forward<Args>(args)...);
     }
 } // namespace Nrl

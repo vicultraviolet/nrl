@@ -2,22 +2,23 @@
 
 #include "./Ref.hpp"
 #include "./ArrayIterator.hpp"
+#include "./Subrange.hpp"
 
 namespace Nrl {
     template<typename T, usize C>
-    class BoundedArray {
+    class Pool {
     public:
         using ValueType = T;
-        using Iterator = ArrayIterator<BoundedArray>;
-        using ConstIterator = ArrayConstIterator<BoundedArray>;
-        using ReverseIterator = ArrayReverseIterator<BoundedArray>;
-        using ConstReverseIterator = ArrayConstReverseIterator<BoundedArray>;
+        using Iterator = ArrayIterator<Pool>;
+        using ConstIterator = ArrayConstIterator<Pool>;
+        using ReverseIterator = ArrayReverseIterator<Pool>;
+        using ConstReverseIterator = ArrayConstReverseIterator<Pool>;
     public:
-        [[nodiscard]] static BoundedArray Empty(void) { return BoundedArray(); }
+        [[nodiscard]] static Pool Empty(void) { return Pool(); }
 
         template<typename... Args>
-        [[nodiscard]] static BoundedArray New(Args&&... args) {
-            BoundedArray a;
+        [[nodiscard]] static Pool New(Args&&... args) {
+            Pool a;
 
             ((void)[&](void) {
                 a.emplace(Forward<Args>(args));
@@ -27,8 +28,8 @@ namespace Nrl {
         }
 
         template<c_HasMake... Args>
-        [[nodiscard]] static BoundedArray NewFrom(Args&&... args) {
-            BoundedArray a;
+        [[nodiscard]] static Pool NewFrom(Args&&... args) {
+            Pool a;
 
             ((void)[&](void) {
                 a.emplace(Forward<Args>(args));
@@ -37,9 +38,28 @@ namespace Nrl {
             return a;
         }
 
+        template<c_InputIterator It>
+        [[nodiscard]] static Pool Copy(Subrange<It> range) {
+            Pool a;
+
+            for (const T& x : range)
+                a.emplace(x);
+
+            return a;
+        }
+        template<c_InputIterator It>
+        [[nodiscard]] static Pool Move(Subrange<It> range) {
+            Pool a;
+
+            for (const T& x : range)
+                a.emplace(Nrl::Move(x));
+
+            return a;
+        }
+
         template<typename... Args>
-        [[nodiscard]] static BoundedArray Fill(usize length, const Args&... args) {
-            BoundedArray a;
+        [[nodiscard]] static Pool Fill(usize length, const Args&... args) {
+            Pool a;
 
             while (a.m_Length != length)
                 a.emplace(args...);
@@ -48,8 +68,8 @@ namespace Nrl {
         }
 
         template<typename F, typename... Args>
-        [[nodiscard]] static BoundedArray FillWith(usize length, F&& factory, const Args&... args) {
-            BoundedArray a;
+        [[nodiscard]] static Pool FillWith(usize length, F&& factory, const Args&... args) {
+            Pool a;
 
             while (a.m_Length != length)
                 a.emplace_with(Forward<F>(factory), args...);
@@ -58,8 +78,8 @@ namespace Nrl {
         }
 
         template<typename Args>
-        [[nodiscard]] static BoundedArray FillFrom(usize length, Args&& args) {
-            BoundedArray a;
+        [[nodiscard]] static Pool FillFrom(usize length, Args&& args) {
+            Pool a;
 
             while (a.m_Length != length)
                 a.emplace_from(Forward<Args>(args));
@@ -67,13 +87,13 @@ namespace Nrl {
             return a;
         }
 
-        ~BoundedArray(void) { clear(); }
+        ~Pool(void) { clear(); }
 
-        BoundedArray(const BoundedArray& other) {
+        Pool(const Pool& other) {
             while (m_Length != other.m_Length)
                 emplace(other[m_Length]);
         }
-        BoundedArray& operator=(const BoundedArray& other) {
+        Pool& operator=(const Pool& other) {
             if (this == &other)
                 return *this;
 
@@ -102,18 +122,18 @@ namespace Nrl {
             return *this;
         }
 
-        BoundedArray(BoundedArray&& other) noexcept {
+        Pool(Pool&& other) noexcept {
             while (m_Length != other.m_Length)
-                emplace(Move(other[m_Length]));
+                emplace(Nrl::Move(other[m_Length]));
         }
-        BoundedArray& operator=(BoundedArray&& other) noexcept {
+        Pool& operator=(Pool&& other) noexcept {
             if (this == &other)
                 return *this;
 
             if (m_Length == other.m_Length) {
                 usize i = 0;
                 for (auto it = begin(); it != end(); it++)
-                    *it = Move(other[i++]);
+                    *it = Nrl::Move(other[i++]);
             } else
             if (m_Length > other.m_Length) {
                 while (m_Length != other.m_Length)
@@ -121,15 +141,15 @@ namespace Nrl {
 
                 usize i = 0;
                 for (auto it = begin(); it != end(); it++)
-                    *it = Move(other[i++]);
+                    *it = Nrl::Move(other[i++]);
             } else
             if (m_Length < other.m_Length) {
                 usize i = 0;
                 for (auto it = begin(); it != end(); it++)
-                    *it = Move(other[i++]);
+                    *it = Nrl::Move(other[i++]);
 
                 while (m_Length != other.m_Length)
-                    emplace(Move(other[m_Length]));
+                    emplace(Nrl::Move(other[m_Length]));
             }
 
             return *this;
@@ -195,19 +215,19 @@ namespace Nrl {
         [[nodiscard]] constexpr T* _ptr_at(usize i) { return (ref() + i).ptr(); }
         [[nodiscard]] constexpr const T* _ptr_at(usize i) const { return (ref() + i).ptr(); }
 
-        BoundedArray(void) = default;
+        Pool(void) = default;
     private:
         alignas(T) ubyte m_Data[C * sizeof(T)];
         usize m_Length = 0;
     };
 
     template<typename T, typename... Args>
-    [[nodiscard]] BoundedArray<T, sizeof...(Args)> NewBoundedArray(Args&&... args) {
-        return BoundedArray<T, sizeof...(Args)>::New(Forward<Args>(args)...);
+    [[nodiscard]] Pool<T, sizeof...(Args)> NewPool(Args&&... args) {
+        return Pool<T, sizeof...(Args)>::New(Forward<Args>(args)...);
     }
 
     template<c_HasMake First, c_HasMake... Args>
-    [[nodiscard]] auto NewBoundedArrayFrom(First&& first, Args&&... args) {
-        return BoundedArray<typename First::Type, sizeof...(Args)+1>::NewFrom(Forward<First>(first), Forward<Args>(args)...);
+    [[nodiscard]] auto NewPoolFrom(First&& first, Args&&... args) {
+        return Pool<typename First::Type, sizeof...(Args)+1>::NewFrom(Forward<First>(first), Forward<Args>(args)...);
     }
 } // namespace Nrl
