@@ -60,7 +60,7 @@ namespace Nrl {
             return *this;
         }
 
-        [[nodiscard]] constexpr Span<T> sub(iptr begin, iptr end) const {
+        [[nodiscard]] constexpr Span<T> sub(isize begin, isize end) const {
             return New(m_Ref + begin, m_Length - begin - end);
         }
 

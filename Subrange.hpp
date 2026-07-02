@@ -5,13 +5,13 @@
 
 namespace Nrl {
     template<c_RandomAccessIterator It>
-    [[nodiscard]] constexpr iptr Distance(It first, It last) {
+    [[nodiscard]] constexpr isize Distance(It first, It last) {
         return last - first;
     }
 
     template<c_InputIterator It>
-    [[nodiscard]] constexpr iptr Distance(It first, It last) {
-        iptr count = 0;
+    [[nodiscard]] constexpr isize Distance(It first, It last) {
+        isize count = 0;
         while (first != last) {
             first++;
             count++;
@@ -83,7 +83,7 @@ namespace Nrl {
         [[nodiscard]] constexpr Iterator begin(void) const { return m_Begin; }
         [[nodiscard]] constexpr Iterator end(void) const { return m_End; }
 
-        [[nodiscard]] constexpr iptr distance(void) const { return Distance(m_Begin, m_End); }
+        [[nodiscard]] constexpr isize distance(void) const { return Distance(m_Begin, m_End); }
         [[nodiscard]] constexpr usize length(void) const { return (usize)Absolute(distance()); }
         [[nodiscard]] constexpr bool is_empty(void) const { return length() == 0; }
 

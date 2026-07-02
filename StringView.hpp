@@ -67,11 +67,11 @@ namespace Nrl {
         [[nodiscard]] constexpr bool contains(StringView choosing) const { return find(choosing).is_some(); }
         [[nodiscard]] constexpr bool contains(utf8rune rune) const { return find(rune).is_some(); }
 
-        [[nodiscard]] constexpr StringView sub(iptr begin, iptr end) const {
+        [[nodiscard]] constexpr StringView sub(isize begin, isize end) const {
             return New(m_Chars.sub(begin, end));
         }
 
-        [[nodiscard]] constexpr StringView substr(iptr begin, iptr end) const {
+        [[nodiscard]] constexpr StringView substr(isize begin, isize end) const {
             Iterator first = at((usize)begin);
             Iterator last  = first + (usize)(get_length() - begin - end);
 

@@ -18,6 +18,6 @@ namespace Nrl {
             { it -= n } -> c_SameAs<It&>;
             { it +  n } -> c_SameAs<It>;
             { it -  n } -> c_SameAs<It>;
-            { it - it } -> c_SameAs<iptr>;
+            { it - it } -> c_SameAs<isize>;
         };
 } // namespace Nrl

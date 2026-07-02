@@ -25,7 +25,7 @@ namespace Nrl {
 		[[nodiscard]] constexpr ArrayIterator operator+(usize x) const { return m_Ref + x; }
 		[[nodiscard]] constexpr ArrayIterator operator-(usize x) const { return m_Ref - x; }
 
-		[[nodiscard]] constexpr iptr operator-(ArrayIterator other) const { return m_Ref - other.m_Ref; }
+		[[nodiscard]] constexpr isize operator-(ArrayIterator other) const { return m_Ref - other.m_Ref; }
 
 		[[nodiscard]] constexpr T* operator->(void) const { return m_Ref.ptr(); }
 		[[nodiscard]] constexpr T& operator*(void) const { return *m_Ref; }
@@ -71,7 +71,7 @@ namespace Nrl {
 		[[nodiscard]] constexpr ArrayConstIterator operator+(usize x) const { return m_Ref + x; }
 		[[nodiscard]] constexpr ArrayConstIterator operator-(usize x) const { return m_Ref - x; }
 
-		[[nodiscard]] constexpr iptr operator-(ArrayConstIterator other) const { return m_Ref - other.m_Ref; }
+		[[nodiscard]] constexpr isize operator-(ArrayConstIterator other) const { return m_Ref - other.m_Ref; }
 
 		[[nodiscard]] constexpr T* operator->(void) const { return m_Ref.ptr(); }
 		[[nodiscard]] constexpr T& operator*(void) const { return *m_Ref; }
@@ -116,7 +116,7 @@ namespace Nrl {
 		[[nodiscard]] constexpr ArrayReverseIterator operator+(usize x) const { return m_Ref - x; }
 		[[nodiscard]] constexpr ArrayReverseIterator operator-(usize x) const { return m_Ref + x; }
 
-		[[nodiscard]] constexpr iptr operator-(ArrayReverseIterator other) const { return other.m_Ref - m_Ref; }
+		[[nodiscard]] constexpr isize operator-(ArrayReverseIterator other) const { return other.m_Ref - m_Ref; }
 
 		[[nodiscard]] constexpr T* operator->(void) const { return m_Ref.ptr(); }
 		[[nodiscard]] constexpr T& operator*(void) const { return *m_Ref; }
@@ -162,7 +162,7 @@ namespace Nrl {
 		[[nodiscard]] constexpr ArrayConstReverseIterator operator+(usize x) const { return m_Ref - x; }
 		[[nodiscard]] constexpr ArrayConstReverseIterator operator-(usize x) const { return m_Ref + x; }
 
-		[[nodiscard]] constexpr iptr operator-(ArrayConstReverseIterator other) const { return other.m_Ref - m_Ref; }
+		[[nodiscard]] constexpr isize operator-(ArrayConstReverseIterator other) const { return other.m_Ref - m_Ref; }
 
 		[[nodiscard]] constexpr T* operator->(void) const { return m_Ref.ptr(); }
 		[[nodiscard]] constexpr T& operator*(void) const { return *m_Ref; }

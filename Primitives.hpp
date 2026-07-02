@@ -44,11 +44,11 @@ namespace Nrl {
         using usize = size_t;
         constexpr usize usizemax = SIZE_MAX;
 
+        using isize = ptrdiff_t;
+        constexpr isize isizemax = PTRDIFF_MAX;
+
         using uptr = uintptr_t;
         constexpr uptr uptrmax = UINTPTR_MAX;
-
-        using iptr = ptrdiff_t;
-        constexpr iptr iptrmax = PTRDIFF_MAX;
 
         using utf8char = char8_t;
         using utf8rune = char32_t;
