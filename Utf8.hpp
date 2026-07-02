@@ -5,6 +5,7 @@
 
 #include "./Span.hpp"
 #include "./Subrange.hpp"
+#include "./Pool.hpp"
 
 namespace Nrl {
     namespace Utf8 {
@@ -46,6 +47,31 @@ namespace Nrl {
         template<c_Char T>
         [[nodiscard]] constexpr usize GetStringSize(Ref<const T> chars) {
             return strlen((const char*)chars.ptr());
+        }
+
+        [[nodiscard]] constexpr Pool<ubyte, 4> Encode(utf8rune rune) {
+            auto bytes = Pool<ubyte, 4>::Empty();
+
+            if (rune < 0x80) {
+                bytes.emplace(rune);
+            } else
+            if (rune < 0x800) {
+                bytes.emplace(0xC0 | (rune >> 6));
+                bytes.emplace(0x80 | (rune & 0x3F));
+            } else
+            if (rune < 0x10000) {
+                bytes.emplace(0xE0 | (rune >> 12));
+                bytes.emplace(0x80 | ((rune >> 6) & 0x3F));
+                bytes.emplace(0x80 | (rune & 0x3F));
+            } else
+            if (rune < 0x110000) {
+                bytes.emplace(0xF0 | (rune >> 18));
+                bytes.emplace(0x80 | ((rune >> 12) & 0x3F));
+                bytes.emplace(0x80 | ((rune >> 6) & 0x3F));
+                bytes.emplace(0x80 | (rune & 0x3F));
+            }
+
+            return bytes;
         }
 
         [[nodiscard]] constexpr utf8rune Decode(Span<const ubyte> ch) {
