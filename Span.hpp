@@ -60,7 +60,7 @@ namespace Nrl {
             return *this;
         }
 
-        [[nodiscard]] constexpr Span<T> sub(iptr begin, iptr end) {
+        [[nodiscard]] constexpr Span<T> sub(iptr begin, iptr end) const {
             return New(m_Ref + begin, m_Length - begin - end);
         }
 
@@ -76,6 +76,7 @@ namespace Nrl {
 
         [[nodiscard]] constexpr Ref<T> ref(void) const { return m_Ref; }
         [[nodiscard]] constexpr usize length(void) const { return m_Length; }
+        [[nodiscard]] constexpr bool is_empty(void) const { return m_Length == 0; }
 
   		template<typename U>
 		    requires IsConvertible_v<T*, U*>
@@ -85,7 +86,7 @@ namespace Nrl {
 		[[nodiscard]] explicit operator Span<U>(void) const { return Span<U>::New((Ref<U>)m_Ref, m_Length); }
 
         [[nodiscard]] static Span _None(void) { return Span(); }
-        [[nodiscard]] constexpr bool _is_some(void) const { return m_Ref._is_some() && m_Length != 0; }
+        [[nodiscard]] constexpr bool _is_some(void) const { return m_Ref._is_some(); }
     private:
         Span(void) : m_Ref(Ref<T>::_None()), m_Length(0) {}
         Span(Ref<T> ref, usize length) : m_Ref(ref), m_Length(length) {}
