@@ -244,4 +244,32 @@ namespace Nrl {
     [[nodiscard]] auto NewTupleFrom(Args&&... args) {
         return Tuple<typename Args::Type...>::NewFrom(Forward<Args>(args)...);
     }
+
+    template<usize I, typename... Signature>
+    [[nodiscard]] constexpr auto& get(Tuple<Signature...>& t) { return Get<I>(t);
+    }
+
+    template<usize I, typename... Signature>
+    [[nodiscard]] constexpr const auto& get(const Tuple<Signature...>& t) { return Get<I>(t); }
+
+    template<usize I, typename... Signature>
+    [[nodiscard]] constexpr auto&& get(Tuple<Signature...>&& t) { return Move(Get<I>(t)); }
 } // namespace Nrl
+
+namespace std {
+    template<typename T>
+    struct tuple_size;
+
+    template<decltype(sizeof(0)) I, typename T>
+    struct tuple_element;
+
+    template<typename... Signature>
+    struct tuple_size<Nrl::Tuple<Signature...>> {
+        static constexpr decltype(sizeof(0)) value = Nrl::TupleLength_v<Signature...>;
+    };
+
+    template<decltype(sizeof(0)) I, typename... Signature>
+    struct tuple_element<I, Nrl::Tuple<Signature...>> {
+        using type = Nrl::TupleElement_t<I, Nrl::Tuple<Signature...>>;
+    };
+} // namespace std
