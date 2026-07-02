@@ -1,6 +1,6 @@
 #pragma once
 
-#include "./Chars.hpp"
+#include "./StringView.hpp"
 #include "./AlignedHeapAllocator.hpp"
 
 namespace Nrl {
@@ -31,6 +31,8 @@ namespace Nrl {
             str.set(chars);
             return str;
         }
+
+        [[nodiscard]] static String From(StringView view) { return New(view.chars()); }
 
         template<c_Char T>
         [[nodiscard]] static String Of(const T* chars) {
@@ -79,30 +81,34 @@ namespace Nrl {
             return *this;
         }
 
+        [[nodiscard]] constexpr operator StringView(void) const { return StringView::New(chars()); }
+
         template<c_Char T>
         [[nodiscard]] String operator+(Span<T> chars) const { return cat(chars); }
-
         template<c_Char T>
         [[nodiscard]] String operator+(T c) const { return cat(c); }
 
         [[nodiscard]] String operator+(const String& other) const { return cat(other.chars()); }
+        [[nodiscard]] String operator+(StringView view) const { return cat(view); }
 
         template<c_Char T>
         String& operator+=(Span<T> chars) { append(chars); return *this; }
-
         template<c_Char T>
         String& operator+=(T c) { push(c); return *this; }
 
         String& operator+=(const String& other) { append(other.chars()); return *this; }
+        String& operator+=(StringView view) { append(view); return *this; }
 
         template<c_Char T>
         [[nodiscard]] String cat(Span<T> chars) const {
             String str;
-            str.reserve(max_size() + chars.length());
+            str.reserve(max_size() + chars.length() + 2);
             str.set_data(this->chars());
             str.set_data(chars, size());
             return str;
         }
+
+        [[nodiscard]] String cat(StringView view) const { return cat(view.chars()); }
 
         template<c_Char T>
         [[nodiscard]] String cat(T c) const {
@@ -111,13 +117,16 @@ namespace Nrl {
             str.set_data(this->chars());
             *(str.ref() + str.size()) = c;
             str.set_size(size() + 1);
+            return str;
         }
 
         template<c_Char T>
         void append(Span<T> chars) {
-            grow(chars.length());
+            grow(chars.length() + 2);
             set_data(chars, size());
         }
+
+        void append(StringView view) { append(view.chars()); }
 
         template<c_Char T>
         void push(T c) {
@@ -128,7 +137,7 @@ namespace Nrl {
 
         template<c_Char T>
         void set_data(Span<T> chars, usize offset = 0) {
-            memcpy(ref().ptr() + offset, chars.ref().ptr(), chars.length());
+            RefCopy(ref() + offset, chars.ref(), chars.length());
             set_size(chars.length() + offset);
         }
 
@@ -203,14 +212,14 @@ namespace Nrl {
         [[nodiscard]] constexpr ConstIterator begin(void) const { return ref(); }
         [[nodiscard]] constexpr ConstIterator end(void) const { return ref() + size(); }
 
-        [[nodiscard]] usize constexpr get_length(void) const {
+        [[nodiscard]] constexpr usize get_length(void) const {
             if (is_empty())
                 return 0;
             else
                 return Utf8::GetStringLength(chars());
         }
 
-        [[nodiscard]] usize constexpr size(void) const {
+        [[nodiscard]] constexpr usize size(void) const {
             switch (m_State) {
                 case StringState::Long:  return m_Long.size;
                 case StringState::Short: return m_Short.size;
@@ -218,7 +227,7 @@ namespace Nrl {
             }
         }
 
-        [[nodiscard]] usize constexpr max_size(void) const {
+        [[nodiscard]] constexpr usize max_size(void) const {
             switch (m_State) {
                 case StringState::Long:  return m_Long.max_size;
                 case StringState::Short: return k_ShortStringMaxSize;
@@ -268,6 +277,11 @@ namespace Nrl {
         [[nodiscard]] constexpr bool is_short(void) const { return m_State == StringState::Short; }
 
         [[nodiscard]] constexpr StringState state(void) const { return m_State; }
+
+        [[nodiscard]] constexpr bool operator==(const String& o) const { return StringView(*this) == StringView(o); }
+        [[nodiscard]] constexpr bool operator!=(const String& o) const { return !(*this == o); }
+        [[nodiscard]] constexpr bool operator==(StringView v) const { return StringView(*this) == v; }
+        [[nodiscard]] constexpr bool operator!=(StringView v) const { return !(*this == v); }
     private:
         friend class Debug<String>;
 
@@ -293,11 +307,16 @@ namespace Nrl {
         NRL_NO_UNIQUE_ADDRESS Allocator<utf8char> m_Allocator = Allocator<utf8char>::New();
     };
 
-    [[nodiscard]] constexpr String operator""s(const char* chars, usize size) {
-        return String::New(NewSpan(RefFromPtr(chars), size));
-    }
+    namespace StringLiterals {
+        [[nodiscard]] constexpr String operator""s(const char* chars, usize size) {
+            return String::New(NewSpan(RefFromPtr(chars), size));
+        }
 
-    [[nodiscard]] constexpr String operator""s(const utf8char* chars, usize size) {
-        return String::New(NewSpan(RefFromPtr(chars), size));
-    }
+        [[nodiscard]] constexpr String operator""s(const utf8char* chars, usize size) {
+            return String::New(NewSpan(RefFromPtr(chars), size));
+        }
+    } // namespace StringLiterals
+    using namespace StringLiterals;
+
+    [[nodiscard]] constexpr StringView StringView::Of(const String& str) { return StringView::New(str.chars()); }
 } // namespace Nrl

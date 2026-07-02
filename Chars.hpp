@@ -28,5 +28,10 @@ namespace Nrl {
             }
             return None();
         }
+
+        template<c_Char T>
+        [[nodiscard]] constexpr bool IsTrimmable(T c) {
+            return c == ' ' || c == '\t' || c == '\r' || c == '\n' || c == '\v' || c == '\f';
+        }
     } // namespace Chars
 } // namespace Nrl
